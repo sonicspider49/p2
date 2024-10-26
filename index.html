@@ -1,15 +1,17 @@
 <html>
+
 <head>
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <script src="https://d3js.org/topojson.v3.min.js"></script>
 </head>
 <style>
     .graph1 {
-      font-family: "Verdana";
-      border: 1px solid black;
-      background:cornsilk;
+        font-family: "Verdana";
+        border: 1px solid black;
+        background: cornsilk;
     }
 </style>
+
 <body>
     <svg id="graph1" height="500" width="500" style="margin:20px"></svg>
 
@@ -22,24 +24,30 @@
         const chartWidth = width - margins.left - margins.right;
         const chartHeight = height - margins.top - margins.bottom;
 
-        const requestData = async function() {
+        const requestData = async function () {
             // import topoJSON for US map
             const us = await d3.json("us-states.json");
-            console.log(us);
+            // console.log(us);
 
             // import health spending data
-            const healthSpendingData = await d3.csv("health_spending_data.csv", d3.autoType);
-            console.log(healthSpendingData);
-            
-            // clean up data by removing $ 
+            const healthSpendingData = await d3.csv("health_spending_data.csv");
+            const hsc = 'Health Spending per Capita'
+            console.log(healthSpendingData)
+            healthSpendingData.forEach((d, i) => {
+                d[hsc] = d[hsc].replace(/[$, ]/g, "").trim()
+                d[hsc] = Number(d[hsc])
+                console.log(d)
+            })
+            console.log(healthSpendingData)
 
 
 
-        
+
 
             // visualization 2 - covid cases by county
         }
         requestData();
     </script>
 </body>
+
 </html>
