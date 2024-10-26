@@ -1,0 +1,45 @@
+<html>
+<head>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://d3js.org/topojson.v3.min.js"></script>
+</head>
+<style>
+    .graph1 {
+      font-family: "Verdana";
+      border: 1px solid black;
+      background:cornsilk;
+    }
+</style>
+<body>
+    <svg id="graph1" height="500" width="500" style="margin:20px"></svg>
+
+    <script>
+        // visualization 1
+        const svg1 = d3.select('svg#graph1');
+        const width = svg1.attr('width');
+        const height = svg1.attr('height');
+        const margins = { top: 20, right: 20, bottom: 20, left: 20 };
+        const chartWidth = width - margins.left - margins.right;
+        const chartHeight = height - margins.top - margins.bottom;
+
+        const requestData = async function() {
+            // import topoJSON for US map
+            const us = await d3.json("us-states.json");
+            console.log(us);
+
+            // import health spending data
+            const healthSpendingData = await d3.csv("health_spending_data.csv", d3.autoType);
+            console.log(healthSpendingData);
+            
+            // clean up data by removing $ 
+
+
+
+        
+
+            // visualization 2 - covid cases by county
+        }
+        requestData();
+    </script>
+</body>
+</html>
