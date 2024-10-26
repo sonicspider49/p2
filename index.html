@@ -5,30 +5,84 @@
     <script src="https://d3js.org/topojson.v3.min.js"></script>
 </head>
 <style>
-    .graph1 {
-        font-family: "Verdana";
-        border: 1px solid black;
-        background: cornsilk;
+    .usmap {
+      font-family: "Verdana";
+      border: 1px solid black;
+      background:cornsilk;
+    }
+    .state {
+        fill: white;
+    }
+    .outline {
+        fill: none;
+        stroke: black;
+        stroke-width: 1px;
     }
 </style>
-
 <body>
-    <svg id="graph1" height="500" width="500" style="margin:20px"></svg>
+    <svg id="usmap" height="600" width="900" style="margin:20px"></svg>
 
     <script>
-        // visualization 1
-        const svg1 = d3.select('svg#graph1');
-        const width = svg1.attr('width');
-        const height = svg1.attr('height');
-        const margins = { top: 20, right: 20, bottom: 20, left: 20 };
-        const chartWidth = width - margins.left - margins.right;
-        const chartHeight = height - margins.top - margins.bottom;
+        // visualization 1 - map of US with health care spending for each state
+        const svg1 = d3.select('svg#usmap');
+        const width1 = svg1.attr('width');
+        const height1 = svg1.attr('height');
+        const margins1 = { top: 20, right: 20, bottom: 20, left: 20 };
+        const mapWidth1 = width1 - margins1.left - margins1.right;
+        const mapHeight1 = height1 - margins1.top - margins1.bottom;
+        const usmap = svg1.append("g")
+                       .attr("transform","translate("+margins1.left+","+margins1.top+")");
 
-        const requestData = async function () {
+        const requestData = async function() {
             // import topoJSON for US map
             const us = await d3.json("us-states.json");
-            // console.log(us);
+            console.log(us);
 
+            // draw US map
+            var states = topojson.feature(us, us.objects.states);
+            var statesMesh = topojson.mesh(us, us.objects.states);
+            var projection1 = d3.geoAlbersUsa().fitSize([mapWidth1, mapHeight1], states);
+            var path1 = d3.geoPath().projection(projection1);
+
+            let statePaths = usmap.selectAll("path.state").data(states.features)
+                       .join("path")
+                       .attr("class", "state")
+                       .attr("d", path1)
+                       .on('mouseover',  mouseoverState )
+                       .on('mouseout',  mouseoutState )
+                       .on('click', function() {
+                            updateStateMap( d );
+                       });
+
+            usmap.append("path").datum(statesMesh)
+                              .attr("class","outline")
+                              .attr("d", path1);
+
+            // build quantile color scale for coloring the states by health spending
+
+            // color the states using the color scale
+            usmap.selectAll(".state")
+               .style("fill", "white" ); // d => colorScale( stateDict[d.id].total )
+
+            // write mouseoverState function to show name of state and amount of money on mouseover
+            function mouseoverState() {
+                let state = d3.select(this);
+
+                state.attr("stroke","black")
+                     .attr("stroke-width", 2);
+            }
+            // write mouseoutState function to get rid of label 
+            function mouseoutState() {
+                let state = d3.select(this);
+                state.attr("stroke","none")
+                     .attr("stroke-width", 0);
+            }
+
+            // write updateState function to update map 2 with county-level COVID data for selected state
+            function updateStateMap() {
+
+            }
+            
             // import health spending data
             const healthSpendingData = await d3.csv("health_spending_data.csv");
             const hsc = 'Health Spending per Capita'
