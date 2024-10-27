@@ -5,11 +5,6 @@
     <script src="https://d3js.org/topojson.v3.min.js"></script>
 </head>
 <style>
-    .usmap {
-      font-family: "Verdana";
-      border: 1px solid black;
-      background:cornsilk;
-    }
     .state {
         fill: white;
     }
@@ -18,12 +13,16 @@
         stroke: black;
         stroke-width: 1px;
     }
+    .statemap {
+        fill: white;
+    }
 </style>
 <body>
     <svg id="usmap" height="600" width="900" style="margin:20px"></svg>
+    <svg id="statemap" height="300" width="300" style="margin:20px"></svg>
 
     <script>
-        // visualization 1 - map of US with health care spending for each state
+        // VISUALIZATION 1 - map of US with health care spending for each state
         const svg1 = d3.select('svg#usmap');
         const width1 = svg1.attr('width');
         const height1 = svg1.attr('height');
@@ -33,11 +32,22 @@
         const usmap = svg1.append("g")
                        .attr("transform","translate("+margins1.left+","+margins1.top+")");
 
+        // VISUALIZATION 2 - covid cases by county
+        const svg2 = d3.select('svg#statemap');
+        const width2 = svg2.attr('width');
+        const height2 = svg2.attr('height');
+        const margins2 = { top: 20, right: 20, bottom: 20, left: 20 };
+        const mapWidth2 = width2 - margins2.left - margins2.right;
+        const mapHeight2 = height2 - margins2.top - margins2.bottom;
+        const statemap = svg2.append("g")
+                          .attr("transform","translate("+margins2.left+","+margins2.top+")");
+        
         const requestData = async function() {
             // import topoJSON for US map
-            const us = await d3.json("us-states.json");
+            const us = await d3.json("us-counties.json");
             console.log(us);
 
+            // VISUALIZATION 1
             // draw US map
             var states = topojson.feature(us, us.objects.states);
             var statesMesh = topojson.mesh(us, us.objects.states);
@@ -50,7 +60,8 @@
                        .attr("d", path1)
                        .on('mouseover',  mouseoverState )
                        .on('mouseout',  mouseoutState )
-                       .on('click', function() {
+                       .on('click', (event, d) => {
+                            console.log(d);
                             updateStateMap( d );
                        });
 
@@ -58,9 +69,18 @@
                               .attr("class","outline")
                               .attr("d", path1);
 
+            // import health spending data
+            const healthSpendingData = await d3.csv("health_spending_data.csv");
+            const hsc = 'Health Spending per Capita'
+            healthSpendingData.forEach((d, i) => {
+                d[hsc] = d[hsc].replace(/[$, ]/g, "").trim();
+                d[hsc] = Number(d[hsc]);
+            })
+            console.log(healthSpendingData)
+
             // build quantile color scale for coloring the states by health spending
 
-            // color the states using the color scale
+            // color the states using the color scale (replace white)
             usmap.selectAll(".state")
                .style("fill", "white" ); // d => colorScale( stateDict[d.id].total )
 
@@ -77,28 +97,49 @@
                 state.attr("stroke","none")
                      .attr("stroke-width", 0);
             }
+            
+            // make legend for the color scale 
+
+
+            // VISUALIZATION 2
+            // import topoJSON for US counties map
+            //const counties = await d3.json("us-counties.json");
+            //console.log(counties);
+            
+            // import COVID data
+            const covidData = await d3.csv("us-counties-2020.csv", d3.autoType);
+            console.log(covidData);
+
+            //  AVA SECTION : 
 
             // write updateState function to update map 2 with county-level COVID data for selected state
-            function updateStateMap() {
+            function updateStateMap( selectedState ) {
+                // isolate topoJSON for selected state to draw state map
+                //var counties = topojson.feature(counties, counties.objects.states);
+               // var countiesMesh = topojson.mesh(counties, counties.objects.states);
+               console.log(selectedState);
+                var stateProjection = d3.geoAlbersUsa().fitSize([mapWidth2, mapHeight2], selectedState);
+                var statePath = d3.geoPath().projection(stateProjection);
+               
+                // AVA- figure out how to draw individual counties in the state
+
+                //let selectedStatePaths = statemap.selectAll("path.county").data(counties.features)
+                     //  .join("path")
+                      //  .attr("class", "county")
+                     //   .attr("d", statePath);
+                        //.on('mouseover',  mouseoverCounty )
+                        //.on('mouseout',  mouseoutCounty )
+
+                statemap.append("path").datum(selectedState)
+                                .attr("class","outline")
+                                .attr("d", statePath);
 
             }
+            /// END OF AVA SECTION
             
-            // import health spending data
-            const healthSpendingData = await d3.csv("health_spending_data.csv");
-            const hsc = 'Health Spending per Capita'
-            console.log(healthSpendingData)
-            healthSpendingData.forEach((d, i) => {
-                d[hsc] = d[hsc].replace(/[$, ]/g, "").trim()
-                d[hsc] = Number(d[hsc])
-                console.log(d)
-            })
-            console.log(healthSpendingData)
 
+            
 
-
-
-
-            // visualization 2 - covid cases by county
         }
         requestData();
     </script>
