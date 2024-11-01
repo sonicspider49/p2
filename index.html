@@ -5,16 +5,25 @@
     <script src="https://d3js.org/topojson.v3.min.js"></script>
 </head>
 <style>
+    .county {
+        fill: none;
+        stroke: none;
+      }
     .state {
         fill: white;
     }
     .outline {
         fill: none;
         stroke: black;
-        stroke-width: 1px;
+        stroke-width: 2px;
     }
     .statemap {
         fill: white;
+    }
+    .county-outline {
+        fill: none;
+        stroke: black;
+        stroke-width: 1px
     }
 </style>
 <body>
@@ -111,17 +120,26 @@
             console.log(covidData);
 
             //  AVA SECTION : 
-
+            var counties = topojson.feature(us, us.objects.counties);
+            var countiesMesh = topojson.mesh(us, us.objects.counties);
             // write updateState function to update map 2 with county-level COVID data for selected state
             function updateStateMap( selectedState ) {
                 // isolate topoJSON for selected state to draw state map
                 //var counties = topojson.feature(counties, counties.objects.states);
-               // var countiesMesh = topojson.mesh(counties, counties.objects.states);
-               console.log(selectedState);
+                // var countiesMesh = topojson.mesh(counties, counties.objects.states);
+                console.log(selectedState);
                 var stateProjection = d3.geoAlbersUsa().fitSize([mapWidth2, mapHeight2], selectedState);
                 var statePath = d3.geoPath().projection(stateProjection);
                
                 // AVA- figure out how to draw individual counties in the state
+                let countiesPaths = statemap.selectAll("path.county").data(counties.features)
+                       .join("path")
+                       .attr("class", "county")
+                       .attr("d", path1);
+
+                statemap.append("path").datum(countiesMesh)
+                              .attr("class","county-outline")
+                              .attr("d", path1);
 
                 //let selectedStatePaths = statemap.selectAll("path.county").data(counties.features)
                      //  .join("path")
