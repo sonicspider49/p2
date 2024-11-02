@@ -63,6 +63,7 @@
             var projection1 = d3.geoAlbersUsa().fitSize([mapWidth1, mapHeight1], states);
             var path1 = d3.geoPath().projection(projection1);
 
+            // state paths
             let statePaths = usmap.selectAll("path.state").data(states.features)
                        .join("path")
                        .attr("class", "state")
@@ -98,7 +99,7 @@
                 let state = d3.select(this);
 
                 state.attr("stroke","black")
-                     .attr("stroke-width", 2);
+                     .attr("stroke-width", 3);
             }
             // write mouseoutState function to get rid of label 
             function mouseoutState() {
@@ -111,23 +112,19 @@
 
 
             // VISUALIZATION 2
-            // import topoJSON for US counties map
-            //const counties = await d3.json("us-counties.json");
-            //console.log(counties);
             
             // import COVID data
             const covidData = await d3.csv("us-counties-2020.csv", d3.autoType);
             console.log(covidData);
-
-            //  AVA SECTION : 
-            var counties = topojson.feature(us, us.objects.counties);
-            var countiesMesh = topojson.mesh(us, us.objects.counties);
+        
             // write updateState function to update map 2 with county-level COVID data for selected state
             function updateStateMap( selectedState ) {
-                // isolate topoJSON for selected state to draw state map
-                //var counties = topojson.feature(counties, counties.objects.states);
-                // var countiesMesh = topojson.mesh(counties, counties.objects.states);
-                console.log(selectedState);
+                // isolate counties for selected state
+                let selectedCounties = us.objects.counties.geometries.filter(function(d) {return selectedState.id == Math.floor(d.id / 1000)});
+                var counties = topojson.feature(us, {type: "GeometryCollection", geometries: selectedCounties});
+                var countiesMesh = topojson.mesh(us, {type: "GeometryCollection", geometries: selectedCounties});
+                
+                // create projection & path for selected state
                 var stateProjection = d3.geoAlbersUsa().fitSize([mapWidth2, mapHeight2], selectedState);
                 var statePath = d3.geoPath().projection(stateProjection);
                
@@ -137,26 +134,16 @@
                                 .attr("d", statePath);
                 
                 // Draw counties within the selected state
-                let countiesPaths = statemap.selectAll("path.county").data(counties.features)
+                statemap.selectAll("path.county").data(counties.features)
                        .join("path")
                        .attr("class", "county")
-                       .attr("d", path1);
+                       .attr("d", statePath);
 
                 statemap.append("path").datum(countiesMesh)
                               .attr("class","county-outline")
-                              .attr("d", path1);
-
-                //let selectedStatePaths = statemap.selectAll("path.county").data(counties.features)
-                     //  .join("path")
-                      //  .attr("class", "county")
-                     //   .attr("d", statePath);
-                        //.on('mouseover',  mouseoverCounty )
-                        //.on('mouseout',  mouseoutCounty )
-
-                
+                              .attr("d", statePath);
 
             }
-            /// END OF AVA SECTION
             
 
             
