@@ -38,6 +38,17 @@
     <div id="button-bar"></div>
 
     <script>
+        // TO DO: 
+        // make buttons look presentable (HIDEOUS rightnow) 
+        // flex boxes to organize for 3 separate graphs 
+        // hover over each state (depending on toggle) to see name of state, value of data
+        // make states disappear when you click on a different one
+        // create toggle for individual state: county-level deaths & mask use 
+        // create functionality to hover over individual county and see name of county & value of data
+        // fix bar so the numbers dont all overlap 
+
+
+
         // VISUALIZATION 1 - map of US with health care spending for each state
         const svg1 = d3.select('svg#usmap');
         const width1 = svg1.attr('width');
@@ -98,20 +109,16 @@
             // import COVID data
             const covidData = await d3.csv("us-counties-2020.csv", d3.autoType);
 
-            // build quantile color scale for coloring the states by health spending
-
-            // color the states using the color scale (replace white)
-
-            // 
+            // health data
             var healthSpendingDict = {};
             healthSpendingData.forEach(d => {
                 const spending = parseFloat(d["Health Spending per Capita"]);
                 healthSpendingDict[d.Location] = { total: spending };
             });
 
+            // covid data
             var covidDeathsDict = {};
             covidData.forEach(d => {
-
                 if (d.state in covidDeathsDict) {
                     covidDeathsDict[d.state] = { total: (covidDeathsDict[d.state].total + d.deaths) }
                 } else {
