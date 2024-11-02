@@ -131,7 +131,12 @@
                 var stateProjection = d3.geoAlbersUsa().fitSize([mapWidth2, mapHeight2], selectedState);
                 var statePath = d3.geoPath().projection(stateProjection);
                
-                // AVA- figure out how to draw individual counties in the state
+                // Draw individual state outline
+                statemap.append("path").datum(selectedState)
+                                .attr("class","outline")
+                                .attr("d", statePath);
+                
+                // Draw counties within the selected state
                 let countiesPaths = statemap.selectAll("path.county").data(counties.features)
                        .join("path")
                        .attr("class", "county")
@@ -148,9 +153,7 @@
                         //.on('mouseover',  mouseoverCounty )
                         //.on('mouseout',  mouseoutCounty )
 
-                statemap.append("path").datum(selectedState)
-                                .attr("class","outline")
-                                .attr("d", statePath);
+                
 
             }
             /// END OF AVA SECTION
