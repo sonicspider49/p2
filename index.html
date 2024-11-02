@@ -8,24 +8,29 @@
     .county {
         fill: none;
         stroke: none;
-      }
+    }
+
     .state {
         fill: white;
     }
+
     .outline {
         fill: none;
         stroke: black;
         stroke-width: 2px;
     }
+
     .statemap {
         fill: white;
     }
+
     .county-outline {
         fill: none;
         stroke: black;
         stroke-width: 1px
     }
 </style>
+
 <body>
     <svg id="usmap" height="600" width="900" style="margin:20px"></svg>
     <svg id="statemap" height="500" width="500" style="margin:20px"></svg>
@@ -39,7 +44,7 @@
         const mapWidth1 = width1 - margins1.left - margins1.right;
         const mapHeight1 = height1 - margins1.top - margins1.bottom;
         const usmap = svg1.append("g")
-                       .attr("transform","translate("+margins1.left+","+margins1.top+")");
+            .attr("transform", "translate(" + margins1.left + "," + margins1.top + ")");
 
         // VISUALIZATION 2 - covid cases by county
         const svg2 = d3.select('svg#statemap');
@@ -49,9 +54,9 @@
         const mapWidth2 = width2 - margins2.left - margins2.right;
         const mapHeight2 = height2 - margins2.top - margins2.bottom;
         const statemap = svg2.append("g")
-                          .attr("transform","translate("+margins2.left+","+margins2.top+")");
-        
-        const requestData = async function() {
+            .attr("transform", "translate(" + margins2.left + "," + margins2.top + ")");
+
+        const requestData = async function () {
             // import topoJSON for US map
             const us = await d3.json("us-counties.json");
             console.log(us);
@@ -65,19 +70,19 @@
 
             // state paths
             let statePaths = usmap.selectAll("path.state").data(states.features)
-                       .join("path")
-                       .attr("class", "state")
-                       .attr("d", path1)
-                       .on('mouseover',  mouseoverState )
-                       .on('mouseout',  mouseoutState )
-                       .on('click', (event, d) => {
-                            console.log(d);
-                            updateStateMap( d );
-                       });
+                .join("path")
+                .attr("class", "state")
+                .attr("d", path1)
+                .on('mouseover', mouseoverState)
+                .on('mouseout', mouseoutState)
+                .on('click', (event, d) => {
+                    console.log(d);
+                    updateStateMap(d);
+                });
 
             usmap.append("path").datum(statesMesh)
-                              .attr("class","outline")
-                              .attr("d", path1);
+                .attr("class", "outline")
+                .attr("d", path1);
 
             // import health spending data
             const healthSpendingData = await d3.csv("health_spending_data.csv");
@@ -91,62 +96,83 @@
             // build quantile color scale for coloring the states by health spending
 
             // color the states using the color scale (replace white)
-            usmap.selectAll(".state")
-               .style("fill", "white" ); // d => colorScale( stateDict[d.id].total )
+            // usmap.selectAll(".state")
+            //    .style("fill", "white" ); // d => colorScale( stateDict[d.id].total )
 
+            var stateDict = {};
+            healthSpendingData.forEach(d => {
+                const spending = parseFloat(d["Health Spending per Capita"]);
+                stateDict[d.Location] = { total: spending };
+            });
+
+            const colorScale = d3.scaleQuantile()
+                .domain(Object.values(stateDict).map(d => d.total))
+                .range(["#fff", "#d1e8ed", "#adc2da", "#8879b3", "#762b80"]);
+
+
+            usmap.selectAll(".state")
+                .style("fill", d => {
+                    const stateName = d.properties.name;
+                    if (stateDict[stateName]) {
+                        return colorScale(stateDict[stateName].total);
+                    } else {
+                        console.warn(`No data for ${stateName}`);
+                        return "#ccc";
+                    }
+                });
             // write mouseoverState function to show name of state and amount of money on mouseover
             function mouseoverState() {
                 let state = d3.select(this);
 
-                state.attr("stroke","black")
-                     .attr("stroke-width", 3);
+                state.attr("stroke", "black")
+                    .attr("stroke-width", 3);
             }
             // write mouseoutState function to get rid of label 
             function mouseoutState() {
                 let state = d3.select(this);
-                state.attr("stroke","none")
-                     .attr("stroke-width", 0);
+                state.attr("stroke", "none")
+                    .attr("stroke-width", 0);
             }
-            
+
             // make legend for the color scale 
 
 
             // VISUALIZATION 2
-            
+
             // import COVID data
             const covidData = await d3.csv("us-counties-2020.csv", d3.autoType);
             console.log(covidData);
-        
+
             // write updateState function to update map 2 with county-level COVID data for selected state
-            function updateStateMap( selectedState ) {
+            function updateStateMap(selectedState) {
                 // isolate counties for selected state
-                let selectedCounties = us.objects.counties.geometries.filter(function(d) {return selectedState.id == Math.floor(d.id / 1000)});
-                var counties = topojson.feature(us, {type: "GeometryCollection", geometries: selectedCounties});
-                var countiesMesh = topojson.mesh(us, {type: "GeometryCollection", geometries: selectedCounties});
-                
+                let selectedCounties = us.objects.counties.geometries.filter(function (d) { return selectedState.id == Math.floor(d.id / 1000) });
+                var counties = topojson.feature(us, { type: "GeometryCollection", geometries: selectedCounties });
+                var countiesMesh = topojson.mesh(us, { type: "GeometryCollection", geometries: selectedCounties });
+
                 // create projection & path for selected state
                 var stateProjection = d3.geoAlbersUsa().fitSize([mapWidth2, mapHeight2], selectedState);
                 var statePath = d3.geoPath().projection(stateProjection);
-               
+
                 // Draw individual state outline
                 statemap.append("path").datum(selectedState)
-                                .attr("class","outline")
-                                .attr("d", statePath);
-                
+                    .attr("class", "outline")
+                    .attr("d", statePath);
+
                 // Draw counties within the selected state
                 statemap.selectAll("path.county").data(counties.features)
-                       .join("path")
-                       .attr("class", "county")
-                       .attr("d", statePath);
+                    .join("path")
+                    .attr("class", "county")
+                    .attr("d", statePath);
 
                 statemap.append("path").datum(countiesMesh)
-                              .attr("class","county-outline")
-                              .attr("d", statePath);
+                    .attr("class", "county-outline")
+                    .attr("d", statePath);
 
             }
-            
 
-            
+
+
 
         }
         requestData();
