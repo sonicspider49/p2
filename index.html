@@ -29,6 +29,33 @@
         stroke: black;
         stroke-width: 1px
     }
+
+    #button-bar button.health-spending {
+        padding: 10px 20px;
+        margin: 0 4px;
+        border: none;
+        border-radius: 4px;
+        background-color: #11bc4a;
+        cursor: pointer;
+        font-family: serif;
+        transition-duration: 0.4s;
+    }
+
+    #button-bar button.covid-deaths {
+        padding: 10px 20px;
+        margin: 0 4px;
+        border: none;
+        border-radius: 4px;
+        background-color: #ba1a5a;
+        cursor: pointer;
+        font-family: serif;
+        transition-duration: 0.4s;
+    }
+
+    #button-bar button:hover {
+        opacity: 0.9;
+        color: rgb(162, 234, 236)
+    }
 </style>
 
 <body>
@@ -47,7 +74,14 @@
         // create functionality to hover over individual county and see name of county & value of data
         // fix bar so the numbers dont all overlap 
 
-
+        const buttonLabels = {
+            0: "Health Spending \u{1F4B0}",
+            1: "COVID-19 Deaths \u{2620} "
+        }
+        const buttonClasses = {
+            0: "health-spending",
+            1: "covid-deaths"
+        }
 
         // VISUALIZATION 1 - map of US with health care spending for each state
         const svg1 = d3.select('svg#usmap');
@@ -153,7 +187,8 @@
             usKeys.forEach(d => {
                 d3.select("div#button-bar")
                     .append("button")
-                    .text(d)
+                    .attr("class", buttonClasses[d])
+                    .text(buttonLabels[d])
                     .on("click", function () {
                         updateUsScale(d);
                     })
