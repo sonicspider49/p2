@@ -66,7 +66,6 @@
 
     <script>
         // TO DO: 
-        // make buttons look presentable (HIDEOUS rightnow) 
         // flex boxes to organize for 3 separate graphs 
         // hover over each state (depending on toggle) to see name of state, value of data
         // make states disappear when you click on a different one
@@ -181,7 +180,12 @@
                         }
                     });
                 drawLegend("#colorLegend", colorScale);
+
+                // need to bring mouseoverState function into here or something?
+                // how to simultaneously access both the button toggle choice and which state is being hovered over 
+                // usDataLabel.text(stateDict[stateName].total);
             }
+            
             // buttons for map of US toggle
             const usKeys = Object.keys(usData);
             usKeys.forEach(d => {
@@ -195,19 +199,58 @@
             })
 
 
+            // add box and text with info for the mouseovers
+            let usMouseGroup = usmap.append("g");
+            let usLabelBox = usMouseGroup.append("rect")
+                                  .attr("id", "usLabelBox")
+                                  .attr("fill", "white")
+                                  .attr("stroke", "black")
+                                  .attr("stroke-width", 1)
+                                  .attr("width", 110)
+                                  .attr("height", 50);
+            let stateLabel = usMouseGroup.append("text")
+                                          .attr("id","stateLabel")
+                                          .attr("dominant-baseline", "top");
+            let usDataLabel = usMouseGroup.append("text")
+                                          .attr("id", "usDataLabel");
 
-            // write mouseoverState function to show name of state and amount of money on mouseover
-            function mouseoverState() {
+            // mouseoverState function to show name of state and amount of money on mouseover
+            function mouseoverState(event) {
                 let state = d3.select(this);
-
+                
+                // make state outline thicker
                 state.attr("stroke", "black")
                     .attr("stroke-width", 3);
+                
+                // make label appear with name of state & value of data (can't figure out how to get data)
+                let location = d3.pointer(event); 
+                let name = state.datum().properties.name;
+                console.log(state.datum());
+
+                usLabelBox.attr("visibility","")
+                          .attr("x", location[0])
+                          .attr("y", location[1]);
+                stateLabel.text(name)
+                          .attr("visibility", "")
+                          .attr("x", location[0]+5)
+                          .attr("y", location[1]+20)
+                usDataLabel.attr("visibility", "")
+                           .attr("x", location[0]+5)
+                           .attr("y", location[1]+40)
             }
+
             // write mouseoutState function to get rid of label 
             function mouseoutState() {
                 let state = d3.select(this);
+                
+                // make state outline back to normal thickness
                 state.attr("stroke", "none")
                     .attr("stroke-width", 0);
+                
+                // get rid of labels
+                stateLabel.attr("visibility", "hidden");
+                usLabelBox.attr("visibility","hidden");
+                usDataLabel.attr("visibility","hidden");
             }
 
             // make legend for the color scale 
