@@ -185,7 +185,7 @@
                 // how to simultaneously access both the button toggle choice and which state is being hovered over 
                 // usDataLabel.text(stateDict[stateName].total);
             }
-            
+
             // buttons for map of US toggle
             const usKeys = Object.keys(usData);
             usKeys.forEach(d => {
@@ -202,55 +202,55 @@
             // add box and text with info for the mouseovers
             let usMouseGroup = usmap.append("g");
             let usLabelBox = usMouseGroup.append("rect")
-                                  .attr("id", "usLabelBox")
-                                  .attr("fill", "white")
-                                  .attr("stroke", "black")
-                                  .attr("stroke-width", 1)
-                                  .attr("width", 110)
-                                  .attr("height", 50);
+                .attr("id", "usLabelBox")
+                .attr("fill", "white")
+                .attr("stroke", "black")
+                .attr("stroke-width", 1)
+                .attr("width", 110)
+                .attr("height", 50);
             let stateLabel = usMouseGroup.append("text")
-                                          .attr("id","stateLabel")
-                                          .attr("dominant-baseline", "top");
+                .attr("id", "stateLabel")
+                .attr("dominant-baseline", "top");
             let usDataLabel = usMouseGroup.append("text")
-                                          .attr("id", "usDataLabel");
+                .attr("id", "usDataLabel");
 
             // mouseoverState function to show name of state and amount of money on mouseover
             function mouseoverState(event) {
                 let state = d3.select(this);
-                
+
                 // make state outline thicker
                 state.attr("stroke", "black")
                     .attr("stroke-width", 3);
-                
+
                 // make label appear with name of state & value of data (can't figure out how to get data)
-                let location = d3.pointer(event); 
+                let location = d3.pointer(event);
                 let name = state.datum().properties.name;
                 console.log(state.datum());
 
-                usLabelBox.attr("visibility","")
-                          .attr("x", location[0])
-                          .attr("y", location[1]);
+                usLabelBox.attr("visibility", "")
+                    .attr("x", location[0])
+                    .attr("y", location[1]);
                 stateLabel.text(name)
-                          .attr("visibility", "")
-                          .attr("x", location[0]+5)
-                          .attr("y", location[1]+20)
+                    .attr("visibility", "")
+                    .attr("x", location[0] + 5)
+                    .attr("y", location[1] + 20)
                 usDataLabel.attr("visibility", "")
-                           .attr("x", location[0]+5)
-                           .attr("y", location[1]+40)
+                    .attr("x", location[0] + 5)
+                    .attr("y", location[1] + 40)
             }
 
             // write mouseoutState function to get rid of label 
             function mouseoutState() {
                 let state = d3.select(this);
-                
+
                 // make state outline back to normal thickness
                 state.attr("stroke", "none")
                     .attr("stroke-width", 0);
-                
+
                 // get rid of labels
                 stateLabel.attr("visibility", "hidden");
-                usLabelBox.attr("visibility","hidden");
-                usDataLabel.attr("visibility","hidden");
+                usLabelBox.attr("visibility", "hidden");
+                usDataLabel.attr("visibility", "hidden");
             }
 
             // make legend for the color scale 
@@ -263,6 +263,15 @@
             // write updateState function to update map 2 with county-level COVID data for selected state
             function updateStateMap(selectedState) {
                 // isolate counties for selected state
+
+                //unclear previous state
+                statemap.selectAll(".county").remove();
+                statemap.selectAll(".county-outline").remove();
+                statemap.selectAll(".outline").remove();
+
+
+
+
                 let selectedCounties = us.objects.counties.geometries.filter(function (d) { return selectedState.id == Math.floor(d.id / 1000) });
                 var counties = topojson.feature(us, { type: "GeometryCollection", geometries: selectedCounties });
                 var countiesMesh = topojson.mesh(us, { type: "GeometryCollection", geometries: selectedCounties });
