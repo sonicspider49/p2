@@ -143,6 +143,7 @@
         left: 55%; */
 
     }
+
     .ustooltip {
         pointer-events: none;
     }
@@ -280,6 +281,12 @@
 
             var usData = [healthSpendingDict, covidDeathsDict];
             function updateUsScale(usToggle) {
+
+                const formatValue = usToggle == 0
+                    ? d3.format("$,.0f")  // Currency format for health spending
+                    : d3.format(",d");    // Comma-separated integers for deaths
+
+
                 let stateDict = usData[usToggle];
                 console.log(stateDict);
 
@@ -296,15 +303,17 @@
                             return "#ccc";
                         }
                     });
-                drawLegend("#colorLegend", colorScale);
+                drawLegend("#colorLegend", colorScale, formatValue);
 
                 // need to bring mouseoverState function into here or something?
                 // how to simultaneously access both the button toggle choice and which state is being hovered over 
                 // usDataLabel.text(stateDict[stateName].total);
             }
 
-            // initialize with health spending
-            let currentUsToggle = 0;
+
+            // initialize us map
+            let currentUsToggle = 1; // show covid death data initially
+            updateUsScale(currentUsToggle);
 
             // buttons for map of US toggle
             const usKeys = Object.keys(usData);
@@ -314,7 +323,7 @@
                     .attr("class", buttonClasses[d])
                     .text(buttonLabels[d])
                     .on("click", function () {
-                        currentUsToggle = d;
+                        currentUsToggle = Number(d);
                         updateUsScale(d);
                     })
             })
@@ -322,40 +331,40 @@
             // Mouseover tooltip stuff
             let ustooltipWidth = 110;
             let ustooltipHeight = 50;
-            let usMouseoverMesh =  usmap.append("path")
-                       .attr("class","usmouseover outline")
-                       .style("stroke", "black")
-                       .style("stroke-width", 3)
-                       .attr("d", "");
+            let usMouseoverMesh = usmap.append("path")
+                .attr("class", "usmouseover outline")
+                .style("stroke", "black")
+                .style("stroke-width", 3)
+                .attr("d", "");
 
             let ustooltip = usmap.append("g")
-                       .attr("class","ustooltip")
-                       .attr("visibility","hidden");
-            
+                .attr("class", "ustooltip")
+                .attr("visibility", "hidden");
+
             ustooltip.append("rect")
-                    .attr("fill", "white")
-                    .attr("stroke", "black")
-                    .attr("stroke-width", 1)
-                    .attr("x", -ustooltipWidth / 2.0)
-                    .attr("y", 0)
-                    .attr("width",ustooltipWidth)
-                    .attr("height",ustooltipHeight)
+                .attr("fill", "white")
+                .attr("stroke", "black")
+                .attr("stroke-width", 1)
+                .attr("x", -ustooltipWidth / 2.0)
+                .attr("y", 0)
+                .attr("width", ustooltipWidth)
+                .attr("height", ustooltipHeight)
 
             let stateLabel = ustooltip.append("text")
-                    .attr("text-anchor","middle")
-                    .attr("alignment-baseline","hanging")
-                    .attr("x", 0)
-                    .attr("y", 2);
-            
+                .attr("text-anchor", "middle")
+                .attr("alignment-baseline", "hanging")
+                .attr("x", 0)
+                .attr("y", 2);
+
             let usDataLabel = ustooltip.append("text")
-                       .attr("text-anchor","middle")
-                       .attr("alignment-baseline","hanging")
-                       .attr("x", 0)
-                       .attr("y", 22);
+                .attr("text-anchor", "middle")
+                .attr("alignment-baseline", "hanging")
+                .attr("x", 0)
+                .attr("y", 22);
 
             // mouseoverState function to show name of state and amount of money on mouseover
             function mouseoverState(event, d) {
-                ustooltip.style("visibility","visible")
+                ustooltip.style("visibility", "visible")
 
                 let state = d3.select(this);
 
@@ -368,20 +377,24 @@
                 // get data somehow
                 console.log(state.datum());
 
+                var dollarform = d3.format("$,.0f")
                 stateLabel.text(name);
-                usDataLabel.text(value); // put data in here
-                
-                let bounds = path1.bounds( state.datum() );
-                let x = (bounds[0][0]+bounds[1][0])/2.0;
+                usDataLabel.text((currentUsToggle === 0) ? dollarform(value) : d3.format(",d")(value));
+
+                // stateLabel.text(name);
+                // usDataLabel.text(value); // put data in here
+
+                let bounds = path1.bounds(state.datum());
+                let x = (bounds[0][0] + bounds[1][0]) / 2.0;
                 let y = bounds[1][1] - 15;
-                ustooltip.attr("transform",`translate(${x},${y})`);
-                var mo = topojson.mesh(us, us.objects.states, function(a, b) { return a.id === name || b.id === name; });
+                ustooltip.attr("transform", `translate(${x},${y})`);
+                var mo = topojson.mesh(us, us.objects.states, function (a, b) { return a.id === name || b.id === name; });
                 usMouseoverMesh.datum(mo).attr("d", path1)
             }
 
             // write mouseoutState function to get rid of label 
             function mouseoutState() {
-                ustooltip.style("visibility","hidden");
+                ustooltip.style("visibility", "hidden");
                 let state = d3.select(this);
 
                 usMouseoverMesh.attr("d", "");
@@ -459,7 +472,9 @@
         //  Takes in an SVG element selector <legendSelector> and a d3 color scale <legendColorScale>
         //
         // Usage example: drawLegend("#legendID", grossIncomeColorScale)
-        function drawLegend(legendSelector, legendColorScale) {
+        function drawLegend(legendSelector, legendColorScale, formatValue) {
+            d3.select(legendSelector).selectAll("*").remove(); //need this to prevent overlap
+
 
             // This code should adapt to a variety of different kinds of color scales
             //  Credit Prof. Rz if you are basing a legend on this structure, and note PERFORMANCE CONSIDERATIONS
@@ -490,7 +505,8 @@
             let barScale = d3.scaleLinear().domain([legendMinMax[0] - minMaxExtension,
             legendMinMax[1] + minMaxExtension])
                 .range([0, legendBarWidth]);
-            let barAxis = d3.axisBottom(barScale);
+
+            let barAxis = d3.axisBottom(barScale).tickFormat(formatValue);
 
             // Place for bar slices to live
             let bar = legend.append("g")
