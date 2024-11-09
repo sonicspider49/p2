@@ -143,6 +143,9 @@
         left: 55%; */
 
     }
+    .ustooltip {
+        pointer-events: none;
+    }
 </style>
 
 <body>
@@ -312,7 +315,39 @@
                     })
             })
 
+            // Mouseovers
+            let ustooltipWidth = 110;
+            let ustooltipHeight = 50;
+            let usMouseoverMesh =  usmap.append("path")
+                       .attr("class","usmouseover outline")
+                       .style("stroke", "black")
+                       .style("stroke-width", 3)
+                       .attr("d", "");
 
+            let ustooltip = usmap.append("g")
+                       .attr("class","ustooltip")
+                       .attr("visibility","hidden");
+            
+            ustooltip.append("rect")
+                    .attr("fill", "white")
+                    .attr("stroke", "black")
+                    .attr("stroke-width", 1)
+                    .attr("x", -ustooltipWidth / 2.0)
+                    .attr("y", 0)
+                    .attr("width",ustooltipWidth)
+                    .attr("height",ustooltipHeight)
+
+            let stateLabel = ustooltip.append("text")
+                    .attr("text-anchor","middle")
+                    .attr("alignment-baseline","hanging")
+                    .attr("x", 0)
+                    .attr("y", 2);
+            
+            let usDataLabel = ustooltip.append("text")
+                       .attr("text-anchor","middle")
+                       .attr("alignment-baseline","hanging")
+                       .attr("x", 0)
+                       .attr("y", 22);
             // add box and text with info for the mouseovers
             let usMouseGroup = usmap.append("g");
             let usLabelBox = usMouseGroup.append("rect")
@@ -322,49 +357,36 @@
                 .attr("stroke-width", 1)
                 .attr("width", 110)
                 .attr("height", 50);
-            let stateLabel = usMouseGroup.append("text")
-                .attr("id", "stateLabel")
-                .attr("dominant-baseline", "top");
-            let usDataLabel = usMouseGroup.append("text")
-                .attr("id", "usDataLabel");
 
             // mouseoverState function to show name of state and amount of money on mouseover
             function mouseoverState(event) {
-                let state = d3.select(this);
+                ustooltip.style("visibility","visible")
 
-                // make state outline thicker
-                state.attr("stroke", "black")
-                    .attr("stroke-width", 3);
+                let state = d3.select(this);
 
                 // make label appear with name of state & value of data (can't figure out how to get data)
                 let location = d3.pointer(event);
                 let name = state.datum().properties.name;
+                // get data somehow
                 console.log(state.datum());
 
-                usLabelBox.attr("visibility", "")
-                    .attr("x", location[0])
-                    .attr("y", location[1]);
-                stateLabel.text(name)
-                    .attr("visibility", "")
-                    .attr("x", location[0] + 5)
-                    .attr("y", location[1] + 20)
-                usDataLabel.attr("visibility", "")
-                    .attr("x", location[0] + 5)
-                    .attr("y", location[1] + 40)
+                stateLabel.text(name);
+                usDataLabel.text(name); // put data in here
+                
+                    let bounds = path1.bounds( state.datum() );
+                let x = (bounds[0][0]+bounds[1][0])/2.0;
+                let y = bounds[1][1] - 15;
+                ustooltip.attr("transform",`translate(${x},${y})`);
+                var mo = topojson.mesh(us, us.objects.states, function(a, b) { return a.id === name || b.id === name; });
+                usMouseoverMesh.datum(mo).attr("d", path1)
             }
 
             // write mouseoutState function to get rid of label 
             function mouseoutState() {
+                ustooltip.style("visibility","hidden");
                 let state = d3.select(this);
 
-                // make state outline back to normal thickness
-                state.attr("stroke", "none")
-                    .attr("stroke-width", 0);
-
-                // get rid of labels
-                stateLabel.attr("visibility", "hidden");
-                usLabelBox.attr("visibility", "hidden");
-                usDataLabel.attr("visibility", "hidden");
+                usMouseoverMesh.attr("d", "");
             }
 
             // make legend for the color scale 
