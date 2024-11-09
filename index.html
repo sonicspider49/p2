@@ -303,6 +303,9 @@
                 // usDataLabel.text(stateDict[stateName].total);
             }
 
+            // initialize with health spending
+            let currentUsToggle = 0;
+
             // buttons for map of US toggle
             const usKeys = Object.keys(usData);
             usKeys.forEach(d => {
@@ -311,11 +314,12 @@
                     .attr("class", buttonClasses[d])
                     .text(buttonLabels[d])
                     .on("click", function () {
+                        currentUsToggle = d;
                         updateUsScale(d);
                     })
             })
 
-            // Mouseovers
+            // Mouseover tooltip stuff
             let ustooltipWidth = 110;
             let ustooltipHeight = 50;
             let usMouseoverMesh =  usmap.append("path")
@@ -348,18 +352,9 @@
                        .attr("alignment-baseline","hanging")
                        .attr("x", 0)
                        .attr("y", 22);
-            // add box and text with info for the mouseovers
-            let usMouseGroup = usmap.append("g");
-            let usLabelBox = usMouseGroup.append("rect")
-                .attr("id", "usLabelBox")
-                .attr("fill", "white")
-                .attr("stroke", "black")
-                .attr("stroke-width", 1)
-                .attr("width", 110)
-                .attr("height", 50);
 
             // mouseoverState function to show name of state and amount of money on mouseover
-            function mouseoverState(event) {
+            function mouseoverState(event, d) {
                 ustooltip.style("visibility","visible")
 
                 let state = d3.select(this);
@@ -367,13 +362,16 @@
                 // make label appear with name of state & value of data (can't figure out how to get data)
                 let location = d3.pointer(event);
                 let name = state.datum().properties.name;
+
+                let stateDict = (currentUsToggle === 0) ? healthSpendingDict : covidDeathsDict;
+                let value = stateDict[name].total;
                 // get data somehow
                 console.log(state.datum());
 
                 stateLabel.text(name);
-                usDataLabel.text(name); // put data in here
+                usDataLabel.text(value); // put data in here
                 
-                    let bounds = path1.bounds( state.datum() );
+                let bounds = path1.bounds( state.datum() );
                 let x = (bounds[0][0]+bounds[1][0])/2.0;
                 let y = bounds[1][1] - 15;
                 ustooltip.attr("transform",`translate(${x},${y})`);
