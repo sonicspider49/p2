@@ -97,6 +97,8 @@
 
 
     .state {
+        stroke: black;
+        stroke-width: 1px;
         fill: gray;
     }
 
@@ -296,6 +298,11 @@
                     updateStateMap(d);
                 });
 
+            const nyState = states.features.find(d => d.properties.name === "New York")
+            if (nyState) {
+                // Initialize with New York
+                updateStateMap(nyState);
+            }
             usmap.append("path").datum(statesMesh)
                 .attr("class", "outline")
                 .attr("d", path1);
@@ -383,11 +390,7 @@
                             return "#ccc";
                         }
                     });
-                drawLegend("#colorLegend", colorScale, formatValue);
-
-                // need to bring mouseoverState function into here or something?
-                // how to simultaneously access both the button toggle choice and which state is being hovered over 
-                // usDataLabel.text(stateDict[stateName].total);
+                drawLegend("#colorLegend", colorScale, formatValue)
             }
 
 
@@ -446,23 +449,22 @@
             function mouseoverState(event, d) {
                 ustooltip.style("visibility", "visible")
 
+
                 let state = d3.select(this);
+                state.style("stroke-width", "4px");
+
 
                 // make label appear with name of state & value of data (can't figure out how to get data)
                 let location = d3.pointer(event);
                 let name = state.datum().properties.name;
-
                 let stateDict = (currentUsToggle === 0) ? healthSpendingDict : covidDeathsDict;
                 let value = stateDict[name].total;
-                // get data somehow
-                console.log(state.datum());
+
 
                 var dollarform = d3.format("$,.0f")
                 stateLabel.text(name);
                 usDataLabel.text((currentUsToggle === 0) ? dollarform(value) : d3.format(",d")(value));
 
-                // stateLabel.text(name);
-                // usDataLabel.text(value); // put data in here
 
                 let bounds = path1.bounds(state.datum());
                 let x = (bounds[0][0] + bounds[1][0]) / 2.0;
@@ -472,13 +474,17 @@
                 usMouseoverMesh.datum(mo).attr("d", path1)
             }
 
-            // write mouseoutState function to get rid of label 
+
+            // write mouseoutState function to get rid of label
             function mouseoutState() {
                 ustooltip.style("visibility", "hidden");
                 let state = d3.select(this);
+                state.style("stroke-width", "1px");
+
 
                 usMouseoverMesh.attr("d", "");
             }
+
 
             // make legend for the color scale 
 
