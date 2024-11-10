@@ -11,7 +11,6 @@
         box-sizing: border-box;
     }
 
-
     body,
     html {
         height: 100%;
@@ -20,7 +19,6 @@
         align-items: center;
     }
 
-
     .container {
         display: flex;
         flex-direction: column;
@@ -28,23 +26,18 @@
         width: 100%;
     }
 
-
     .top-box {
         flex: 1;
         background-color: lightblue;
         display: flex;
         justify-content: center;
         align-items: center;
-
-
     }
-
 
     .bottom-container {
         display: flex;
         flex: 1;
     }
-
 
     .bottom-left,
     .bottom-right {
@@ -52,26 +45,17 @@
         display: flex;
         justify-content: center;
         /* align-items: center; */
-
-
         height: 100vh;
         align-items: flex-start;
     }
 
-
     .bottom-left {
         background-color: lightgreen;
-
-
-
-
     }
-
 
     .bottom-right {
         background-color: lightcoral;
     }
-
 
     .main-title {
         padding: 10px 20px;
@@ -85,23 +69,17 @@
         font-size: 40px;
     }
 
-
-
-
-
-
     .county {
         fill: gray;
-        stroke: none;
+        stroke: black;
+        stroke-width: 1px;
     }
-
 
     .state {
         stroke: black;
         stroke-width: 1px;
         fill: gray;
     }
-
 
     .outline {
         fill: none;
@@ -112,8 +90,6 @@
 
     .statemap {
         fill: white;
-
-
         position: relative;
         /* display: flex; */
         gap: 8px;
@@ -122,17 +98,13 @@
         border-radius: 4px;
         /* margin-top: 40px; */
         top: 99%;
-
-
     }
-
 
     .county-outline {
         fill: none;
         stroke: black;
         stroke-width: 1px
     }
-
 
     #button-bar button.health-spending {
         padding: 10px 20px;
@@ -150,7 +122,6 @@
         display: block
     }
 
-
     #button-bar button.covid-deaths {
         padding: 10px 20px;
         margin: 0 4px;
@@ -166,12 +137,10 @@
         display: block
     }
 
-
     #button-bar button:hover {
         opacity: 0.9;
         color: rgb(162, 234, 236)
     }
-
 
     #button-bar-state {
         position: relative;
@@ -183,11 +152,13 @@
         border-radius: 4px;
         margin-top: 20px;
         left: 50%;
-
-
     }
 
     .ustooltip {
+        pointer-events: none;
+    }
+
+    .statetooltip {
         pointer-events: none;
     }
 </style>
@@ -206,10 +177,6 @@
             <div class="usmap-description">Box holder</div>
             <svg class="colorLegend" id="colorLegend" height="100" width="300"
                 style="background: #fff; margin-top: 30%; margin-left: 1%;"></svg>
-
-
-
-
         </div>
 
 
@@ -228,13 +195,6 @@
     </div>
 
     <script>
-        // TO DO: 
-        // flex boxes to organize for 3 separate graphs 
-        // hover over each state (depending on toggle) to see name of state, value of data
-        // make states disappear when you click on a different one
-        // create toggle for individual state: county-level deaths & mask use 
-        // create functionality to hover over individual county and see name of county & value of data
-        // fix bar so the numbers dont all overlap 
 
         const buttonLabels = {
             0: "Health Spending \u{1F4B0}",
@@ -273,6 +233,7 @@
         const mapHeight2 = height2 - margins2.top - margins2.bottom;
         const statemap = svg2.append("g")
             .attr("transform", "translate(" + margins2.left + "," + margins2.top + ")");
+        let currentStateToggle = 0; // show mask usage data initially
 
         const requestData = async function () {
             // import topoJSON for US map
@@ -376,7 +337,7 @@
             });
 
             console.log("dateeeee", latestCovidData)
-            const fipsDeathsDict = {};
+            var fipsDeathsDict = {};
             latestCovidData.forEach(d => {
                 const fips = d.fips;
                 if (fips in fipsDeathsDict) {
@@ -386,7 +347,7 @@
                 }
             });
 
-            const fipsCasesDict = {};
+            var fipsCasesDict = {};
             latestCovidData.forEach(d => {
                 const fips = d.fips;
                 if (fips in fipsCasesDict) {
@@ -398,12 +359,11 @@
 
             console.log("deaths for county 53061 is:", fipsDeathsDict["53061"]);
 
-            const countyData = [fipsCasesDict, fipsDeathsDict];
 
-
+            var countyData = [fipsCasesDict, fipsDeathsDict];
 
             function updateCountyData(selectedState, countyToggle) {
-                const selectedDict = countyToggle === 0 ? fipsCasesDict : fipsDeathsDict;
+                const selectedDict = countyData[countyToggle];
 
                 const colorScale = d3.scaleQuantile()
                     .domain(Object.values(selectedDict))
@@ -447,7 +407,7 @@
 
 
             // initialize us map
-            let currentUsToggle = 1; // show covid death data initially
+            let currentUsToggle = 0; // show health spending data initially
             updateUsScale(currentUsToggle);
 
             // buttons for map of US toggle
@@ -463,7 +423,7 @@
                     })
             })
 
-            // Mouseover tooltip stuff
+            // US map Mouseover tooltip stuff
             let ustooltipWidth = 110;
             let ustooltipHeight = 40;
             let usMouseoverMesh = usmap.append("path")
@@ -537,16 +497,15 @@
                 usMouseoverMesh.attr("d", "");
             }
 
-
-            // make legend for the color scale 
-
-
             // VISUALIZATION 2
 
 
+            // move county data stuff here
 
             // write updateState function to update map 2 with county-level COVID data for selected state
             function updateStateMap(selectedState) {
+                ///updateCountyData(selectedState, currentStateToggle); // initialize county data - causes errors 
+                
                 // isolate counties for selected state
 
                 //unclear previous state
@@ -555,11 +514,8 @@
                 statemap.selectAll(".outline").remove();
                 d3.select("#button-bar-state").style("display", "none").selectAll("button").remove();
 
-
-
                 //adding button to new state
                 d3.select("#button-bar-state").style("display", "flex");
-
 
                 Object.keys(stateButtonLabels).forEach(i => {
                     d3.select("#button-bar-state")
@@ -567,11 +523,10 @@
                         .attr("class", stateButtonClasses[i])
                         .text(stateButtonLabels[i])
                         .on("click", function () {
-                            const toggle = parseInt(i);
-                            updateCountyData(selectedState, toggle);
+                            currentStateToggle = parseInt(i);
+                            updateCountyData(selectedState, currentStateToggle);
                         });
                 });
-
 
 
                 let selectedCounties = us.objects.counties.geometries.filter(function (d) { return selectedState.id == Math.floor(d.id / 1000) });
@@ -591,13 +546,89 @@
                 statemap.selectAll("path.county").data(counties.features)
                     .join("path")
                     .attr("class", "county")
-                    .attr("d", statePath);
+                    .attr("d", statePath)
+                    .on('mouseover', mouseoverCounty)
+                    .on('mouseout', mouseoutCounty);
 
                 statemap.append("path").datum(countiesMesh)
                     .attr("class", "county-outline")
                     .attr("d", statePath);
 
+                    
+                // State map Mouseover tooltip stuff
+                let statetooltipWidth = 110;
+                let statetooltipHeight = 40;
+                let stateMouseoverMesh = statemap.append("path")
+                    .attr("class", "statemouseover outline")
+                    .style("stroke", "black")
+                    .style("stroke-width", 3)
+                    .attr("d", "");
+
+                let statetooltip = statemap.append("g")
+                    .attr("class", "statetooltip")
+                    .attr("visibility", "hidden");
+
+                statetooltip.append("rect")
+                    .attr("fill", "white")
+                    .attr("stroke", "black")
+                    .attr("stroke-width", 1)
+                    .attr("x", -statetooltipWidth / 2.0)
+                    .attr("y", 0)
+                    .attr("width", statetooltipWidth)
+                    .attr("height", statetooltipHeight)
+
+                let countyLabel = statetooltip.append("text")
+                    .attr("text-anchor", "middle")
+                    .attr("alignment-baseline", "hanging")
+                    .attr("x", 0)
+                    .attr("y", 2);
+
+                let stateDataLabel = statetooltip.append("text")
+                    .attr("text-anchor", "middle")
+                    .attr("alignment-baseline", "hanging")
+                    .attr("x", 0)
+                    .attr("y", 22);
+
+                console.log(fipsCasesDict);
+
+                // mouseoverCounty function to show name of county and data value
+                function mouseoverCounty(event, d) {
+                    statetooltip.style("visibility", "visible")
+
+                    let county = d3.select(this);
+                    county.style("stroke-width", "2px");
+                    
+                    // make label appear with name of county & value of data
+                    let location = d3.pointer(event);
+                    let name = county.datum().properties.name;
+                    let fips = county.datum().id;
+                    let countyDict = (currentStateToggle === 0) ? fipsCasesDict : fipsDeathsDict;
+                    let value = countyDict[fips];
+
+                    countyLabel.text(name);
+                    stateDataLabel.text(value);
+
+                    let bounds = statePath.bounds(county.datum());
+                    let x = (bounds[0][0] + bounds[1][0]) / 2.0;
+                    let y = bounds[1][1] - 15;
+                    statetooltip.attr("transform", `translate(${x},${y})`);
+                    var mo = topojson.mesh(us, { type: "GeometryCollection", geometries: selectedCounties }, function (a, b) { return a.id === name || b.id === name; });
+                    stateMouseoverMesh.datum(mo).attr("d", statePath)
+                }
+
+                // clear mouseovers
+                function mouseoutCounty() {
+                    statetooltip.style("visibility", "hidden");
+                    let county = d3.select(this);
+                    county.style("stroke-width", "1px");
+                    stateMouseoverMesh.attr("d", "");
+                }
+
             }
+
+            // initialize state map - cant figure out
+            //let stateToggle = 0; // show mask usage data initially
+            //updateStateMap(currentStateToggle);
 
 
 
