@@ -168,31 +168,39 @@
        pointer-events: none;
    }
 </style>
-
 <body>
-   <div class="container">
-       <div class="top-box">
-           <div class="main-title">Title</div>
-           <div id="button-bar"></div>
-           <!-- <div id="button-bar-state" style="display: none;"></div> -->
-           <svg class="main-map" id="usmap" height="500" width="900" style="margin: auto 5px;
+    <div class="container">
+        <div class="top-box">
+            <div class="main-title">Title</div>
+            <div id="button-bar"></div>
+            <!-- <div id="button-bar-state" style="display: none;"></div> -->
+            <svg class="main-map" id="usmap" height="500" width="900" style="margin: auto 5px;
            float: left; "></svg>
-           <div class="usmap-description">Box holder</div>
-           <svg class="colorLegend" id="colorLegend" height="100" width="300"
-               style="background: #fff; margin-top: 30%; margin-left: 1%;"></svg>
-       </div>
-
-       <div class="bottom-container">
-           <div class="bottom-left">
-               <div id="button-bar-state" style="display: none;"></div>
-               <svg id="statemap" height="600" width="500"></svg>
-           </div>
-           <div class="bottom-right">
-               <!-- <svg id="statemap" height="500" width="500" style="margin:20px"></svg> -->
-               <!-- <svg id="colorLegend" height="80" width="600" style="background: #fff; margin-top:30px"></svg> -->
-           </div>
-       </div>
-   </div>
+            <div class="usmap-description">Box holder</div>
+            <svg class="colorLegend" id="colorLegend" height="100" width="300"
+                style="background: #fff; margin-top: 30%; margin-left: 1%;"></svg>
+        </div>
+ 
+ 
+        <div class="bottom-container">
+            <div class="bottom-left">
+                <div id="button-bar-state" style="display: none;"></div>
+                <svg id="statemap" height="600" width="500"></svg>
+            </div>
+            <div class="bottom-right">
+                <!-- <div id="line-button"></div> -->
+                <button>Test 1</button>
+                <button>Test 2</button>
+                <button>Test 3</button>
+ 
+ 
+                <svg id="chart" height="600" width="500"></svg>
+                <!-- <svg id="statemap" height="500" width="500" style="margin:20px"></svg> -->
+                <!-- <svg id="colorLegend" height="80" width="600" style="background: #fff; margin-top:30px"></svg> -->
+            </div>
+        </div>
+    </div>
+ 
 
 
     <script>
@@ -207,8 +215,8 @@
         }
 
         const stateButtonLabels = {
-            0: "Mask Usage",
-            1: "County-Level Deaths"
+            0: "Total Cases",
+            1: "Total Deaths"
         };
         const stateButtonClasses = {
             0: "mask-usage",
@@ -235,6 +243,17 @@
         const statemap = svg2.append("g")
             .attr("transform", "translate(" + margins2.left + "," + margins2.top + ")");
         let currentStateToggle = 0; // show mask usage data initially
+
+        // VISUALIZATION 3 - line graph
+        const svg3 = d3.select('svg#chart');
+        const width3 = svg3.attr('width');
+        const height3 = svg3.attr('height');
+        const margins3 = { top: 20, right: 20, bottom: 20, left: 20 };
+        const chartWidth = width3 - margins3.left - margins3.right;
+        const chartHeight = height3 - margins3.top - margins3.bottom;
+        let annotations = svg3.append("g").attr("id","annotations");
+        let chartArea = svg3.append('g')
+                              .attr('transform', `translate(${margins3.left},${margins3.top})`);
 
         const requestData = async function () {
             // import topoJSON for US map
@@ -276,10 +295,6 @@
                 d[hsc] = d[hsc].replace(/[$, ]/g, "").trim();
                 d[hsc] = Number(d[hsc]);
             })
-            console.log(healthSpendingData)
-
-            // import COVID data
-            const covidData = await d3.csv("us-counties-2020.csv", d3.autoType);
 
             // health data
             var healthSpendingDict = {};
@@ -288,9 +303,40 @@
                 healthSpendingDict[d.Location] = { total: spending };
             });
 
-            // covid data
+            // import COVID data
+            const covidData = await d3.csv("us-counties-2020.csv", d3.autoType);
+
+            // extract cumulative data from last day of 2020
+            const latestCovidData = covidData.filter(d => {
+                return d.date.toString().includes("Dec") && d.date.toString().includes("30") && d.date.toString().includes("2020"); //fix this later to include DEC 31 if possible ~Abdul
+            });
+
+            // covid deaths data dictionary, by county
+            console.log("dateeeee", latestCovidData)
+            var fipsDeathsDict = {};
+            latestCovidData.forEach(d => {
+                const fips = d.fips;
+                if (fips in fipsDeathsDict) {
+                    fipsDeathsDict[fips] += d.deaths;
+                } else {
+                    fipsDeathsDict[fips] = d.deaths;
+                }
+            });
+
+            // covid cases data dictionary, by county
+            var fipsCasesDict = {};
+            latestCovidData.forEach(d => {
+                const fips = d.fips;
+                if (fips in fipsCasesDict) {
+                    fipsCasesDict[fips] += d.cases;
+                } else {
+                    fipsCasesDict[fips] = d.cases;
+                }
+            });
+            
+            // covid deaths data - SUM UP LATESTCOVIDDATA FROM COUNTIES FOR EACH STATE
             var covidDeathsDict = {};
-            covidData.forEach(d => {
+            latestCovidData.forEach(d => {
                 if (d.state in covidDeathsDict) {
                     covidDeathsDict[d.state] = { total: (covidDeathsDict[d.state].total + d.deaths) }
                 } else {
@@ -298,24 +344,22 @@
                 }
             });
 
-            console.log(covidDeathsDict)
-
-            var healthSpendingDict = {};
-            healthSpendingData.forEach(d => {
-                const spending = parseFloat(d["Health Spending per Capita"]);
-                healthSpendingDict[d.Location] = { total: spending };
-            });
-
-            // covid data
-            var covidDeathsDict = {};
-            covidData.forEach(d => {
-                if (d.state in covidDeathsDict) {
-                    covidDeathsDict[d.state] = { total: (covidDeathsDict[d.state].total + d.deaths) }
+            // covid cases data - SUM UP LATESTCOVIDDATA FROM COUNTIES FOR EACH STATE
+            var covidCasesDict = {};
+            latestCovidData.forEach(d => {
+                if (d.state in covidCasesDict) {
+                    covidCasesDict[d.state] = { total: (covidCasesDict[d.state].total + d.cases) }
                 } else {
-                    covidDeathsDict[d.state] = { total: d.deaths }
+                    covidCasesDict[d.state] = { total: d.cases }
                 }
             });
 
+            console.log(healthSpendingDict);
+            console.log(covidDeathsDict);
+            console.log(covidCasesDict);
+
+            // array of possible data sets for the US (state-level data)
+            var usData = [healthSpendingDict, covidDeathsDict, covidCasesDict];
 
             // const maskUsageData = await d3.csv("mask-use-by-county.csv");
 
@@ -332,35 +376,7 @@
             // });
             // console.log("Mask Usage of 53061:", maskUsageDict["53061"]);
 
-
-            const latestCovidData = covidData.filter(d => {
-                return d.date.toString().includes("Dec") && d.date.toString().includes("30") && d.date.toString().includes("2020"); //fix this later to include DEC 31 if possible ~Abdul
-            });
-
-            console.log("dateeeee", latestCovidData)
-            var fipsDeathsDict = {};
-            latestCovidData.forEach(d => {
-                const fips = d.fips;
-                if (fips in fipsDeathsDict) {
-                    fipsDeathsDict[fips] += d.deaths;
-                } else {
-                    fipsDeathsDict[fips] = d.deaths;
-                }
-            });
-
-            var fipsCasesDict = {};
-            latestCovidData.forEach(d => {
-                const fips = d.fips;
-                if (fips in fipsCasesDict) {
-                    fipsCasesDict[fips] += d.cases;
-                } else {
-                    fipsCasesDict[fips] = d.cases;
-                }
-            });
-
-            console.log("deaths for county 53061 is:", fipsDeathsDict["53061"]);
-
-
+            // array of possible data sets for an individual state (county-level data)
             var countyData = [fipsCasesDict, fipsDeathsDict];
 
             function updateCountyData(selectedState, countyToggle) {
@@ -378,14 +394,11 @@
                     });
             }
 
-
-            var usData = [healthSpendingDict, covidDeathsDict];
             function updateUsScale(usToggle) {
 
                 const formatValue = usToggle == 0
                     ? d3.format("$,.0f")  // Currency format for health spending
-                    : d3.format(",d");    // Comma-separated integers for deaths
-
+                    : d3.format(",d");    // Comma-separated integers for deaths/ cases
 
                 let stateDict = usData[usToggle];
                 console.log(stateDict);
@@ -631,9 +644,86 @@
             //let stateToggle = 0; // show mask usage data initially
             //updateStateMap(currentStateToggle);
 
+            // VISUALIZATION 3
+            var usData = [healthSpendingDict, covidDeathsDict, covidCasesDict];
 
+            function updateLineGraph(xAxisToggle, yAxisToggle) {
+                console.log(usData[xAxisToggle])
+                console.log(usData[xAxisToggle][0])
+                const xExtent = d3.extent(Object.values(usData[xAxisToggle]), d => d.total);
+                const xScale = d3.scaleLinear().domain(xExtent)
+                                               .range([0, chartWidth]); // check with youshra
 
+                const yExtent = d3.extent(Object.values(usData[yAxisToggle]), d => d.total);
+                const yScale = d3.scaleLinear().domain(yExtent)
+                                               .range([chartHeight, 0]);
 
+                // axes
+                let labels = ["Health Spending per Capita", 
+                                "Cumulative COVID-19 Deaths in 2020",
+                                "Cumulative COVID-19 Cases in 2020"];
+                
+                // y axis 
+                let leftAxis = d3.axisLeft(yScale);
+                let leftGridlines = d3.axisLeft(yScale)
+                                      .tickSize(-chartWidth-10)
+                                      .tickFormat("");
+                annotations.append("g")
+                            .attr("class", "y axis")
+                            .attr("transform",`translate(${margins3.left-10},${margins3.top})`)
+                            .call(leftAxis);
+                annotations.append("g")
+                            .attr("class", "y gridlines")
+                            .attr("transform",`translate(${margins3.left-10},${margins3.top})`)
+                            .call(leftGridlines);
+                // y axis label
+                svg3.append("text").text(labels[yAxisToggle])
+                                .attr("x", -chartHeight +10)
+                                .attr("y", 10)
+                                .style("font-size", "15px")
+                                .attr("transform", "rotate(-90)");
+
+                // x axis
+                let bottomAxis = d3.axisBottom(xScale);
+                let bottomGridlines = d3.axisBottom(xScale)
+                                        .tickSize(-chartHeight-10)
+                                        .tickFormat("");
+                annotations.append("g")
+                    .attr("class", "x axis")
+                    .attr("transform",`translate(${margins3.left},${chartHeight+margins3.top+10})`)
+                    .call(bottomAxis);
+                annotations.append("g")
+                    .attr("class", "x gridlines")
+                    .attr("transform",`translate(${margins3.left},${chartHeight+margins3.top+10})`)
+                    .call(bottomGridlines);
+                
+                // x axis label
+                svg3.append("text").text(labels[xAxisToggle])
+                                    .attr("x", chartWidth / 2 + margins3.left)
+                                    .attr("y", height3 - 10)
+                                    .style("font-size", "15px")
+                                    .attr("dominant-baseline", "middle")
+                                    .attr("text-anchor", "middle");
+
+                // plotting data
+                Object.values(usData[xAxisToggle]).forEach((d, i) => {
+                    let stateName = String(d);
+                    let y = usData[yAxisToggle];
+                    chartArea.append('circle')
+                            .attr('cx', xScale(d.total))
+                            .attr('cy', yScale(d.total))
+                            .attr('r', 5)
+                            .attr("fill", "red")
+                            .attr('opacity', 1)
+                            .attr('stroke', "darkred")
+                            .attr('stroke-width', 1)
+                });
+            }
+
+            // initialize toggles - default to covid deaths vs health spending
+            let xAxisToggle = 1; 
+            let yAxisToggle = 0;
+            updateLineGraph(xAxisToggle, yAxisToggle);
         }
         requestData();
     </script>
@@ -641,9 +731,6 @@
     <script>
         // Flexible legend-drawing function - Jeff Rzeszotarski, 2022
         //   Released under MIT Free license
-        //  Takes in an SVG element selector <legendSelector> and a d3 color scale <legendColorScale>
-        //
-        // Usage example: drawLegend("#legendID", grossIncomeColorScale)
         function drawLegend(legendSelector, legendColorScale, formatValue) {
             d3.select(legendSelector).selectAll("*").remove(); //need this to prevent overlap
 
