@@ -1,198 +1,199 @@
 <html>
-
 <head>
-    <script src="https://d3js.org/d3.v7.min.js"></script>
-    <script src="https://d3js.org/topojson.v3.min.js"></script>
+   <script src="https://d3js.org/d3.v7.min.js"></script>
+   <script src="https://d3js.org/topojson.v3.min.js"></script>
 </head>
 <style>
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-    }
+   * {
+       margin: 0;
+       padding: 0;
+       box-sizing: border-box;
+   }
 
-    body,
-    html {
-        height: 100%;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
+   body,
+   html {
+       height: 100%;
+       display: flex;
+       justify-content: center;
+       align-items: center;
+   }
 
-    .container {
-        display: flex;
-        flex-direction: column;
-        height: 100%;
-        width: 100%;
-    }
+   .container {
+       display: flex;
+       flex-direction: column;
+       height: 100%;
+       width: 100%;
+   }
 
-    .top-box {
-        flex: 1;
-        background-color: lightblue;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
+   .top-box {
+       flex: 1;
+       background-color: lightblue;
+       display: flex;
+       justify-content: center;
+       align-items: center;
+   }
 
-    .bottom-container {
-        display: flex;
-        flex: 1;
-    }
+   .bottom-container {
+       display: flex;
+       flex: 1;
+   }
 
-    .bottom-left,
-    .bottom-right {
-        flex: 1;
-        display: flex;
-        justify-content: center;
-        /* align-items: center; */
-        height: 100vh;
-        align-items: flex-start;
-    }
+   .bottom-left,
+   .bottom-right {
+       display: flex;
+       justify-content: center;
+       height: 100vh;
+       align-items: flex-start;
+   }
 
-    .bottom-left {
-        background-color: lightgreen;
-    }
+   .bottom-left {
+       flex: 1;
+       background-color: lightgreen;
+       display: flex;
+       justify-content: flex-start;
+       /* Align the SVG to the left */
+       align-items: center;
+       /* Keep the vertical centering */
+       height: 100%;
+   }
 
-    .bottom-right {
-        background-color: lightcoral;
-    }
+   .bottom-right {
+       flex: 1;
+       background-color: lightcoral;
+   }
 
-    .main-title {
-        padding: 10px 20px;
-        margin: 0 4px;
-        border: none;
-        border-radius: 4px;
-        font-family: serif;
-        position: absolute;
-        top: 5%;
-        left: 3%;
-        font-size: 40px;
-    }
+   .main-title {
+       padding: 10px 20px;
+       margin: 0 4px;
+       border: none;
+       border-radius: 4px;
+       font-family: serif;
+       position: absolute;
+       top: 5%;
+       left: 3%;
+       font-size: 40px;
+   }
 
     .county {
-        fill: gray;
-        stroke: black;
-        stroke-width: 1px;
-    }
+       fill: gray;
+       stroke: black;
+       stroke-width: 1px;
+   }
 
-    .state {
-        stroke: black;
-        stroke-width: 1px;
-        fill: gray;
-    }
+   .state {
+       stroke: black;
+       stroke-width: 1px;
+       fill: gray;
+   }
 
-    .outline {
-        fill: none;
-        stroke: black;
-        stroke-width: 2px;
-    }
+   .outline {
+       fill: none;
+       stroke: black;
+       stroke-width: 2px;
+   }
 
+   .statemap {
+       fill: white;
+       position: relative;
+       /* display: flex; */
+       gap: 8px;
+       padding: 10px;
+       border: none;
+       border-radius: 4px;
+       /* margin-top: 40px; */
+       top: 99%;
+   }
 
-    .statemap {
-        fill: white;
-        position: relative;
-        /* display: flex; */
-        gap: 8px;
-        padding: 10px;
-        border: none;
-        border-radius: 4px;
-        /* margin-top: 40px; */
-        top: 99%;
-    }
+   .county-outline {
+       fill: none;
+       stroke: black;
+       stroke-width: 1px
+   }
 
-    .county-outline {
-        fill: none;
-        stroke: black;
-        stroke-width: 1px
-    }
+   #button-bar button.health-spending {
+       padding: 10px 20px;
+       margin: 0 4px;
+       border: none;
+       border-radius: 4px;
+       background-color: #11bc4a;
+       cursor: pointer;
+       font-family: serif;
+       margin-bottom: 20%;
+       /* transition-duration: 0.4s; */
+       /* position: absolute; */
+       /* top: 99%; */
+       /* left: 99%; */
+       display: block
+   }
 
-    #button-bar button.health-spending {
-        padding: 10px 20px;
-        margin: 0 4px;
-        border: none;
-        border-radius: 4px;
-        background-color: #11bc4a;
-        cursor: pointer;
-        font-family: serif;
-        margin-bottom: 20%;
-        /* transition-duration: 0.4s; */
-        /* position: absolute; */
-        /* top: 99%; */
-        /* left: 99%; */
-        display: block
-    }
+   #button-bar button.covid-deaths {
+       padding: 10px 20px;
+       margin: 0 4px;
+       border: none;
+       border-radius: 4px;
+       background-color: #ba1a5a;
+       cursor: pointer;
+       font-family: serif;
+       /* transition-duration: 0.4s; */
+       /* position: absolute; */
+       /* top: 99%; */
+       /* left: 99%; */
+       display: block
+   }
 
-    #button-bar button.covid-deaths {
-        padding: 10px 20px;
-        margin: 0 4px;
-        border: none;
-        border-radius: 4px;
-        background-color: #ba1a5a;
-        cursor: pointer;
-        font-family: serif;
-        /* transition-duration: 0.4s; */
-        /* position: absolute; */
-        /* top: 99%; */
-        /* left: 99%; */
-        display: block
-    }
+   #button-bar button:hover {
+       opacity: 0.9;
+       color: rgb(162, 234, 236)
+   }
 
-    #button-bar button:hover {
-        opacity: 0.9;
-        color: rgb(162, 234, 236)
-    }
+   #button-bar-state {
+       position: relative;
+       display: flex;
+       gap: 8px;
+       padding: 10px;
+       background-color: white;
+       border: none;
+       border-radius: 4px;
+       /* margin-top: 20px; */
+       left: 50%;
+       top: 10;
+       transform: translateX(-50%);
+   }
 
-    #button-bar-state {
-        position: relative;
-        display: flex;
-        gap: 8px;
-        padding: 10px;
-        background-color: white;
-        border: none;
-        border-radius: 4px;
-        margin-top: 20px;
-        left: 50%;
-    }
-
-    .ustooltip {
-        pointer-events: none;
-    }
+   .ustooltip {
+       pointer-events: none;
+   }
 
     .statetooltip {
-        pointer-events: none;
-    }
+       pointer-events: none;
+   }
 </style>
 
-
 <body>
-    <div class="container">
+   <div class="container">
+       <div class="top-box">
+           <div class="main-title">Title</div>
+           <div id="button-bar"></div>
+           <!-- <div id="button-bar-state" style="display: none;"></div> -->
+           <svg class="main-map" id="usmap" height="500" width="900" style="margin: auto 5px;
+           float: left; "></svg>
+           <div class="usmap-description">Box holder</div>
+           <svg class="colorLegend" id="colorLegend" height="100" width="300"
+               style="background: #fff; margin-top: 30%; margin-left: 1%;"></svg>
+       </div>
 
+       <div class="bottom-container">
+           <div class="bottom-left">
+               <div id="button-bar-state" style="display: none;"></div>
+               <svg id="statemap" height="600" width="500"></svg>
+           </div>
+           <div class="bottom-right">
+               <!-- <svg id="statemap" height="500" width="500" style="margin:20px"></svg> -->
+               <!-- <svg id="colorLegend" height="80" width="600" style="background: #fff; margin-top:30px"></svg> -->
+           </div>
+       </div>
+   </div>
 
-        <div class="top-box">
-            <div class="main-title">Title</div>
-            <div id="button-bar"></div>
-            <!-- <div id="button-bar-state" style="display: none;"></div> -->
-            <svg class="main-map" id="usmap" height="500" width="900" style="margin: auto 5px;
-            float: left; "></svg>
-            <div class="usmap-description">Box holder</div>
-            <svg class="colorLegend" id="colorLegend" height="100" width="300"
-                style="background: #fff; margin-top: 30%; margin-left: 1%;"></svg>
-        </div>
-
-
-        <div class="bottom-container">
-            <div class="bottom-left">
-                <div id="button-bar-state" style="display: none;"></div>
-                <svg id="statemap" height="600" width="500"></svg>
-            </div>
-            <div class="bottom-right">
-                <svg id="statemap" height="500" width="500" style="margin:20px"></svg>
-                <svg id="colorLegend" height="80" width="600" style="background: #fff; margin-top:30px"></svg>
-            </div>
-        </div>
-
-
-    </div>
 
     <script>
 
@@ -597,7 +598,7 @@
 
                     let county = d3.select(this);
                     county.style("stroke-width", "2px");
-                    
+
                     // make label appear with name of county & value of data
                     let location = d3.pointer(event);
                     let name = county.datum().properties.name;
