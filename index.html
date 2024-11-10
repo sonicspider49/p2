@@ -338,24 +338,44 @@
 
             console.log(covidDeathsDict)
 
-            const maskUsageData = await d3.csv("mask-use-by-county.csv");
-
-            const maskUsageDict = {};
-
-            maskUsageData.forEach(d => {
-                maskUsageDict[d.COUNTYFP] = {
-                    never: d.NEVER,
-                    rarely: d.RARELY,
-                    sometimes: d.SOMETIMES,
-                    frequently: d.FREQUENTLY,
-                    always: d.ALWAYS
-                };
+            var healthSpendingDict = {};
+            healthSpendingData.forEach(d => {
+                const spending = parseFloat(d["Health Spending per Capita"]);
+                healthSpendingDict[d.Location] = { total: spending };
             });
-            console.log("Mask Usage Dictionary:", maskUsageDict);
+
+            // covid data
+            var covidDeathsDict = {};
+            covidData.forEach(d => {
+                if (d.state in covidDeathsDict) {
+                    covidDeathsDict[d.state] = { total: (covidDeathsDict[d.state].total + d.deaths) }
+                } else {
+                    covidDeathsDict[d.state] = { total: d.deaths }
+                }
+            });
 
 
-            const latestCovidData = covidData.filter(d => d.date === "2020-12-31");
+            // const maskUsageData = await d3.csv("mask-use-by-county.csv");
 
+            // const maskUsageDict = {};
+
+            // maskUsageData.forEach(d => {
+            //     maskUsageDict[d.COUNTYFP] = {
+            //         never: parseFloat(d.NEVER),
+            //         rarely: parseFloat(d.RARELY),
+            //         sometimes: parseFloat(d.SOMETIMES),
+            //         frequently: parseFloat(d.FREQUENTLY),
+            //         always: parseFloat(d.ALWAYS)
+            //     };
+            // });
+            // console.log("Mask Usage of 53061:", maskUsageDict["53061"]);
+
+
+            const latestCovidData = covidData.filter(d => {
+                return d.date.toString().includes("Dec") && d.date.toString().includes("30") && d.date.toString().includes("2020"); //fix this later to include DEC 31 if possible ~Abdul
+            });
+
+            console.log("dateeeee", latestCovidData)
             const fipsDeathsDict = {};
             latestCovidData.forEach(d => {
                 const fips = d.fips;
@@ -365,6 +385,38 @@
                     fipsDeathsDict[fips] = d.deaths;
                 }
             });
+
+            const fipsCasesDict = {};
+            latestCovidData.forEach(d => {
+                const fips = d.fips;
+                if (fips in fipsCasesDict) {
+                    fipsCasesDict[fips] += d.cases;
+                } else {
+                    fipsCasesDict[fips] = d.cases;
+                }
+            });
+
+            console.log("deaths for county 53061 is:", fipsDeathsDict["53061"]);
+
+            const countyData = [fipsCasesDict, fipsDeathsDict];
+
+
+
+            function updateCountyData(selectedState, countyToggle) {
+                const selectedDict = countyToggle === 0 ? fipsCasesDict : fipsDeathsDict;
+
+                const colorScale = d3.scaleQuantile()
+                    .domain(Object.values(selectedDict))
+                    .range(["#fff5f0", "#fcbba1", "#fc9272", "#fb6a4a", "#cb181d"]);
+
+                statemap.selectAll(".county")
+                    .style("fill", d => {
+                        const countyFips = d.id.toString();
+                        const dataValue = selectedDict[countyFips];
+                        return dataValue ? colorScale(dataValue) : "#ccc";
+                    });
+            }
+
 
             var usData = [healthSpendingDict, covidDeathsDict];
             function updateUsScale(usToggle) {
@@ -514,10 +566,12 @@
                         .append("button")
                         .attr("class", stateButtonClasses[i])
                         .text(stateButtonLabels[i])
-                    //.on("click", function () {
-                    //  updateCountyData(selectedState, i); 
-                    //});
+                        .on("click", function () {
+                            const toggle = parseInt(i);
+                            updateCountyData(selectedState, toggle);
+                        });
                 });
+
 
 
                 let selectedCounties = us.objects.counties.geometries.filter(function (d) { return selectedState.id == Math.floor(d.id / 1000) });
