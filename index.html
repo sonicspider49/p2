@@ -1,177 +1,223 @@
 <html>
+
 <head>
-   <script src="https://d3js.org/d3.v7.min.js"></script>
-   <script src="https://d3js.org/topojson.v3.min.js"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://d3js.org/topojson.v3.min.js"></script>
 </head>
 <style>
-   * {
-       margin: 0;
-       padding: 0;
-       box-sizing: border-box;
-   }
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
 
-   body,
-   html {
-       height: 100%;
-       display: flex;
-       justify-content: center;
-       align-items: center;
-   }
+    body,
+    html {
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
 
-   .container {
-       display: flex;
-       flex-direction: column;
-       height: 100%;
-       width: 100%;
-   }
+    .container {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        width: 100%;
+    }
 
-   .top-box {
-       flex: 1;
-       background-color: lightblue;
-       display: flex;
-       justify-content: center;
-       align-items: center;
-   }
+    .top-box {
+        flex: 1;
+        background-color: lightblue;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
 
-   .bottom-container {
-       display: flex;
-       flex: 1;
-   }
+    .bottom-container {
+        display: flex;
+        flex: 1;
+    }
 
-   .bottom-left,
-   .bottom-right {
-       display: flex;
-       justify-content: center;
-       height: 100vh;
-       align-items: flex-start;
-   }
+    .bottom-left,
+    .bottom-right {
+        display: flex;
+        justify-content: center;
+        height: 100vh;
+        align-items: flex-start;
+    }
 
-   .bottom-left {
-       flex: 1;
-       background-color: lightgreen;
-       display: flex;
-       justify-content: flex-start;
-       /* Align the SVG to the left */
-       align-items: center;
-       /* Keep the vertical centering */
-       height: 100%;
-   }
+    .bottom-left {
+        flex: 1;
+        background-color: lightgreen;
+        display: flex;
+        justify-content: flex-start;
+        /* Align the SVG to the left */
+        align-items: center;
+        /* Keep the vertical centering */
+        height: 100%;
 
-   .bottom-right {
-       flex: 1;
-       background-color: lightcoral;
-   }
+    }
 
-   .main-title {
-       padding: 10px 20px;
-       margin: 0 4px;
-       border: none;
-       border-radius: 4px;
-       font-family: serif;
-       position: absolute;
-       top: 5%;
-       left: 3%;
-       font-size: 40px;
-   }
+    .bottom-right {
+        flex: 1;
+        background-color: lightcoral;
+        position: relative;
+    }
+
+    .main-title {
+        padding: 10px 20px;
+        margin: 0 4px;
+        border: none;
+        border-radius: 4px;
+        font-family: serif;
+        position: absolute;
+        top: 5%;
+        left: 3%;
+        font-size: 40px;
+    }
 
     .county {
-       fill: gray;
-       stroke: black;
-       stroke-width: 1px;
-   }
+        fill: gray;
+        stroke: black;
+        stroke-width: 1px;
+    }
 
-   .state {
-       stroke: black;
-       stroke-width: 1px;
-       fill: gray;
-   }
+    .state {
+        stroke: black;
+        stroke-width: 1px;
+        fill: gray;
+    }
 
-   .outline {
-       fill: none;
-       stroke: black;
-       stroke-width: 2px;
-   }
+    .outline {
+        fill: none;
+        stroke: black;
+        stroke-width: 2px;
+    }
 
-   .statemap {
-       fill: white;
-       position: relative;
-       /* display: flex; */
-       gap: 8px;
-       padding: 10px;
-       border: none;
-       border-radius: 4px;
-       /* margin-top: 40px; */
-       top: 99%;
-   }
+    .statemap {
+        fill: white;
+        position: relative;
+        /* display: flex; */
+        gap: 8px;
+        padding: 10px;
+        border: none;
+        border-radius: 4px;
+        /* margin-top: 40px; */
+        top: 99%;
+    }
 
-   .county-outline {
-       fill: none;
-       stroke: black;
-       stroke-width: 1px
-   }
+    .county-outline {
+        fill: none;
+        stroke: black;
+        stroke-width: 1px
+    }
 
-   #button-bar button.health-spending {
-       padding: 10px 20px;
-       margin: 0 4px;
-       border: none;
-       border-radius: 4px;
-       background-color: #11bc4a;
-       cursor: pointer;
-       font-family: serif;
-       margin-bottom: 20%;
-       /* transition-duration: 0.4s; */
-       /* position: absolute; */
-       /* top: 99%; */
-       /* left: 99%; */
-       display: block
-   }
+    #button-bar button.health-spending {
+        padding: 10px 20px;
+        margin: 0 4px;
+        border: none;
+        border-radius: 4px;
+        background-color: #11bc4a;
+        cursor: pointer;
+        font-family: serif;
+        margin-bottom: 20%;
+        /* transition-duration: 0.4s; */
+        /* position: absolute; */
+        /* top: 99%; */
+        /* left: 99%; */
+        display: block
+    }
 
-   #button-bar button.covid-deaths {
-       padding: 10px 20px;
-       margin: 0 4px;
-       border: none;
-       border-radius: 4px;
-       background-color: #ba1a5a;
-       cursor: pointer;
-       font-family: serif;
-       /* transition-duration: 0.4s; */
-       /* position: absolute; */
-       /* top: 99%; */
-       /* left: 99%; */
-       display: block
-   }
+    #button-bar button.covid-deaths {
+        padding: 10px 20px;
+        margin: 0 4px;
+        border: none;
+        border-radius: 4px;
+        background-color: #ba1a5a;
+        cursor: pointer;
+        font-family: serif;
+        /* transition-duration: 0.4s; */
+        /* position: absolute; */
+        /* top: 99%; */
+        /* left: 99%; */
+        display: block
+    }
 
-   #button-bar button:hover {
-       opacity: 0.9;
-       color: rgb(162, 234, 236)
-   }
+    #button-bar button:hover {
+        opacity: 0.9;
+        color: rgb(162, 234, 236)
+    }
 
-   #button-bar-state {
-       position: relative;
-       display: flex;
-       gap: 8px;
-       padding: 10px;
-       background-color: white;
-       border: none;
-       border-radius: 4px;
-       /* margin-top: 20px; */
-       left: 50%;
-       top: 10;
-       transform: translateX(-50%);
-   }
+    #button-bar-state {
+        position: relative;
+        display: flex;
+        gap: 8px;
+        padding: 10px;
+        background-color: white;
+        border: none;
+        border-radius: 4px;
+        /* margin-top: 20px; */
+        left: 50%;
+        top: 10;
+        transform: translateX(-50%);
+    }
 
-   .ustooltip {
-       pointer-events: none;
-   }
+    .ustooltip {
+        pointer-events: none;
+    }
 
     .statetooltip {
-       pointer-events: none;
-   }
+        pointer-events: none;
+    }
 
-   .gridlines line {
-    stroke: #aaa;
-} 
+    .gridlines line {
+        stroke: #aaa;
+    }
+
+    .lineButtons {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        padding: 10px;
+        background-color: white;
+        border: none;
+        border-radius: 4px;
+        /* margin-top: 20px; */
+        left: 15%;
+        bottom: -80%;
+        transform: translateX(-50%);
+    }
+
+    .lineButtons2 {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        padding: 10px;
+        background-color: white;
+        border: none;
+        border-radius: 4px;
+        /* margin-top: 20px; */
+        left: 25%;
+        bottom: -80%;
+        transform: translateX(-50%);
+    }
+
+    .lineChart {
+        position: absolute;
+        /* left: -20px; */
+        /* bottom: -1px; */
+
+    }
+
+    button.active {
+        background-color: #007bff;
+        color: white;
+    }
 </style>
+
 <body>
     <div class="container">
         <div class="top-box">
@@ -184,25 +230,25 @@
             <svg class="colorLegend" id="colorLegend" height="100" width="300"
                 style="background: #fff; margin-top: 30%; margin-left: 1%;"></svg>
         </div>
- 
- 
+
+
         <div class="bottom-container">
             <div class="bottom-left">
-                <div id="button-bar-state" style="display: none;"></div>
+                <div id="button-bar-state"></div>
                 <svg id="statemap" height="600" width="500"></svg>
             </div>
             <div class="bottom-right">
-                <div id="line-button"></div>
-                <div id="line-button2"></div>
+                <div class="lineButtons" id="line-button"></div>
+                <div class="lineButtons2" id="line-button2"></div>
                 <!-- <div id="line-button"></div> -->
- 
-                <svg id="chart" height="600" width="500"></svg>
+
+                <svg class="lineChart" id="chart" height="600" width="500"></svg>
                 <!-- <svg id="statemap" height="500" width="500" style="margin:20px"></svg> -->
                 <!-- <svg id="colorLegend" height="80" width="600" style="background: #fff; margin-top:30px"></svg> -->
             </div>
         </div>
     </div>
- 
+
 
 
     <script>
@@ -226,11 +272,11 @@
         };
 
         const lineButtonLabels = {
-            0: "Test1",
-            1: "Test2",
-            2: "Test3"
+            0: "Health Spending per Capita",
+            1: "Cumulative COVID-19 Deaths in 2020",
+            2: "Cumulative COVID-19 Deaths in 2020"
         };
- 
+
 
         // VISUALIZATION 1 - map of US with health care spending for each state
         const svg1 = d3.select('svg#usmap');
@@ -260,9 +306,9 @@
         const margins3 = { top: 20, right: 20, bottom: 50, left: 50 };
         const chartWidth = width3 - margins3.left - margins3.right;
         const chartHeight = height3 - margins3.top - margins3.bottom;
-        let annotations = svg3.append("g").attr("id","annotations");
+        let annotations = svg3.append("g").attr("id", "annotations");
         let chartArea = svg3.append('g')
-                              .attr('transform', `translate(${margins3.left},${margins3.top})`);
+            .attr('transform', `translate(${margins3.left},${margins3.top})`);
 
         const requestData = async function () {
             // import topoJSON for US map
@@ -342,7 +388,7 @@
                     fipsCasesDict[fips] = d.cases;
                 }
             });
-            
+
             // covid deaths data - SUM UP LATESTCOVIDDATA FROM COUNTIES FOR EACH STATE
             var covidDeathsDict = {};
             latestCovidData.forEach(d => {
@@ -444,6 +490,7 @@
                         currentUsToggle = Number(d);
                         updateUsScale(d);
                     })
+
             })
 
             // US map Mouseover tooltip stuff
@@ -528,7 +575,7 @@
             // write updateState function to update map 2 with county-level COVID data for selected state
             function updateStateMap(selectedState) {
                 ///updateCountyData(selectedState, currentStateToggle); // initialize county data - causes errors 
-                
+
                 // isolate counties for selected state
 
                 //unclear previous state
@@ -577,7 +624,7 @@
                     .attr("class", "county-outline")
                     .attr("d", statePath);
 
-                    
+
                 // State map Mouseover tooltip stuff
                 let statetooltipWidth = 110;
                 let statetooltipHeight = 40;
@@ -659,7 +706,7 @@
             function updateLineGraph(xAxisToggle, yAxisToggle) {
                 console.log(usData[xAxisToggle])
                 console.log(usData[xAxisToggle][0])
-                
+
                 chartArea.selectAll('circle').remove();
                 annotations.selectAll('.x.axis').remove();
                 annotations.selectAll('.y.axis').remove();
@@ -669,67 +716,67 @@
 
                 const xExtent = d3.extent(Object.values(usData[xAxisToggle]), d => d.total);
                 const xScale = d3.scaleLinear().domain(xExtent)
-                                               .range([0, chartWidth]);
+                    .range([0, chartWidth]);
 
                 const yExtent = d3.extent(Object.values(usData[yAxisToggle]), d => d.total);
                 const yScale = d3.scaleLinear().domain(yExtent)
-                                               .range([chartHeight, 0]);
+                    .range([chartHeight, 0]);
 
                 // axes
-                let labels = ["Health Spending per Capita", 
-                                "Cumulative COVID-19 Deaths in 2020",
-                                "Cumulative COVID-19 Cases in 2020"];
-                
+                let labels = ["Health Spending per Capita",
+                    "Cumulative COVID-19 Deaths in 2020",
+                    "Cumulative COVID-19 Cases in 2020"];
+
                 // y axis 
                 let leftAxis = d3.axisLeft(yScale);
                 let leftGridlines = d3.axisLeft(yScale)
-                                      .tickSize(-chartWidth-10)
-                                      .tickFormat("");
+                    .tickSize(-chartWidth - 10)
+                    .tickFormat("");
                 annotations.append("g")
-                            .attr("class", "y axis")
-                            .attr("transform",`translate(${margins3.left-10},${margins3.top})`)
-                            .call(leftAxis);
+                    .attr("class", "y axis")
+                    .attr("transform", `translate(${margins3.left - 10},${margins3.top})`)
+                    .call(leftAxis);
                 annotations.append("g")
-                            .attr("class", "y gridlines")
-                            .attr("transform",`translate(${margins3.left-10},${margins3.top})`)
-                            .call(leftGridlines);
+                    .attr("class", "y gridlines")
+                    .attr("transform", `translate(${margins3.left - 10},${margins3.top})`)
+                    .call(leftGridlines);
                 // y axis label
                 svg3.append("text").text(labels[yAxisToggle])
-                                .attr("x", -chartHeight +10)
-                                .attr("y", 10)
-                                .style("font-size", "15px")
-                                .attr("transform", "rotate(-90)");
+                    .attr("x", -chartHeight + 10)
+                    .attr("y", 10)
+                    .style("font-size", "15px")
+                    .attr("transform", "rotate(-90)");
 
                 // x axis
                 let bottomAxis = d3.axisBottom(xScale);
                 let bottomGridlines = d3.axisBottom(xScale)
-                                        .tickSize(-chartHeight-10)
-                                        .tickFormat("");
+                    .tickSize(-chartHeight - 10)
+                    .tickFormat("");
                 annotations.append("g")
                     .attr("class", "x axis")
-                    .attr("transform",`translate(${margins3.left},${chartHeight+margins3.top+10})`)
+                    .attr("transform", `translate(${margins3.left},${chartHeight + margins3.top + 10})`)
                     .call(bottomAxis);
                 annotations.append("g")
                     .attr("class", "x gridlines")
-                    .attr("transform",`translate(${margins3.left},${chartHeight+margins3.top+10})`)
+                    .attr("transform", `translate(${margins3.left},${chartHeight + margins3.top + 10})`)
                     .call(bottomGridlines);
-                
+
                 // x axis label
                 svg3.append("text").text(labels[xAxisToggle])
-                                    .attr("x", chartWidth / 2 + margins3.left)
-                                    .attr("y", height3 - 10)
-                                    .style("font-size", "15px")
-                                    .attr("dominant-baseline", "middle")
-                                    .attr("text-anchor", "middle");
+                    .attr("x", chartWidth / 2 + margins3.left)
+                    .attr("y", height3 - 10)
+                    .style("font-size", "15px")
+                    .attr("dominant-baseline", "middle")
+                    .attr("text-anchor", "middle");
 
                 // plotting data
                 Object.keys(usData[xAxisToggle]).forEach((d, i) => {
-                    let stateName = String(d); 
+                    let stateName = String(d);
                     //let x = usData[xAxisToggle][stateName].total;
                     //let y = usData[yAxisToggle][stateName].total;
                     let x = undefined;
                     let y = undefined;
-                    
+
                     if (usData[xAxisToggle][stateName] && usData[yAxisToggle][stateName]) {
                         x = usData[xAxisToggle][stateName].total;
                         y = usData[yAxisToggle][stateName].total;
@@ -740,26 +787,26 @@
                     console.log(x, y)
                     console.log(xScale(x));
                     chartArea.append('circle')
-                            .attr('cx', xScale(x))
-                            .attr('cy', yScale(y))
-                            .attr('r', 5)
-                            .attr("fill", "red")
-                            .attr('opacity', 1)
-                            .attr('stroke', "darkred")
-                            .attr('stroke-width', 1)
-                            .on("mouseover", function() {
-                                console.log(d3.select(this).datum())
-                                let name = d3.select(this).datum();
-                            })
-                            .on("mouseout", function() {
-                                   d3.selectAll("#label")
-                                     .text("");
-                            });
+                        .attr('cx', xScale(x))
+                        .attr('cy', yScale(y))
+                        .attr('r', 5)
+                        .attr("fill", "red")
+                        .attr('opacity', 1)
+                        .attr('stroke', "darkred")
+                        .attr('stroke-width', 1)
+                        .on("mouseover", function () {
+                            console.log(d3.select(this).datum())
+                            let name = d3.select(this).datum();
+                        })
+                        .on("mouseout", function () {
+                            d3.selectAll("#label")
+                                .text("");
+                        });
                 });
             }
 
             // initialize toggles - default to covid deaths vs health spending
-            let xAxisToggle = 1; 
+            let xAxisToggle = 1;
             let yAxisToggle = 0;
             updateLineGraph(xAxisToggle, yAxisToggle);
 
@@ -773,6 +820,11 @@
                     .on("click", function () {
                         xAxisToggle = Number(d);
                         updateLineGraph(xAxisToggle, yAxisToggle);
+
+                        d3.selectAll("div#line-button button")
+                            .classed("active", false);
+
+                        d3.select(this).classed("active", true);
                     })
             });
 
@@ -786,6 +838,10 @@
                     .on("click", function () {
                         yAxisToggle = Number(d);
                         updateLineGraph(xAxisToggle, yAxisToggle);
+                        d3.selectAll("div#line-button2 button")
+                            .classed("active", false);
+
+                        d3.select(this).classed("active", true);
                     })
             });
 
