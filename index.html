@@ -167,6 +167,10 @@
     .statetooltip {
        pointer-events: none;
    }
+
+   .gridlines line {
+    stroke: #aaa;
+} 
 </style>
 <body>
     <div class="container">
@@ -188,11 +192,9 @@
                 <svg id="statemap" height="600" width="500"></svg>
             </div>
             <div class="bottom-right">
+                <div id="line-button"></div>
+                <div id="line-button2"></div>
                 <!-- <div id="line-button"></div> -->
-                <button>Test 1</button>
-                <button>Test 2</button>
-                <button>Test 3</button>
- 
  
                 <svg id="chart" height="600" width="500"></svg>
                 <!-- <svg id="statemap" height="500" width="500" style="margin:20px"></svg> -->
@@ -223,6 +225,13 @@
             1: "county-deaths"
         };
 
+        const lineButtonLabels = {
+            0: "Test1",
+            1: "Test2",
+            2: "Test3"
+        };
+ 
+
         // VISUALIZATION 1 - map of US with health care spending for each state
         const svg1 = d3.select('svg#usmap');
         const width1 = svg1.attr('width');
@@ -248,7 +257,7 @@
         const svg3 = d3.select('svg#chart');
         const width3 = svg3.attr('width');
         const height3 = svg3.attr('height');
-        const margins3 = { top: 20, right: 20, bottom: 20, left: 20 };
+        const margins3 = { top: 20, right: 20, bottom: 50, left: 50 };
         const chartWidth = width3 - margins3.left - margins3.right;
         const chartHeight = height3 - margins3.top - margins3.bottom;
         let annotations = svg3.append("g").attr("id","annotations");
@@ -645,14 +654,22 @@
             //updateStateMap(currentStateToggle);
 
             // VISUALIZATION 3
-            var usData = [healthSpendingDict, covidDeathsDict, covidCasesDict];
+            //var usData = [healthSpendingDict, covidDeathsDict, covidCasesDict];
 
             function updateLineGraph(xAxisToggle, yAxisToggle) {
                 console.log(usData[xAxisToggle])
                 console.log(usData[xAxisToggle][0])
+                
+                chartArea.selectAll('circle').remove();
+                annotations.selectAll('.x.axis').remove();
+                annotations.selectAll('.y.axis').remove();
+                annotations.selectAll('.x.gridlines').remove();
+                annotations.selectAll('.y.gridlines').remove();
+                svg3.selectAll('text').remove();
+
                 const xExtent = d3.extent(Object.values(usData[xAxisToggle]), d => d.total);
                 const xScale = d3.scaleLinear().domain(xExtent)
-                                               .range([0, chartWidth]); // check with youshra
+                                               .range([0, chartWidth]);
 
                 const yExtent = d3.extent(Object.values(usData[yAxisToggle]), d => d.total);
                 const yScale = d3.scaleLinear().domain(yExtent)
@@ -706,17 +723,38 @@
                                     .attr("text-anchor", "middle");
 
                 // plotting data
-                Object.values(usData[xAxisToggle]).forEach((d, i) => {
-                    let stateName = String(d);
-                    let y = usData[yAxisToggle];
+                Object.keys(usData[xAxisToggle]).forEach((d, i) => {
+                    let stateName = String(d); 
+                    //let x = usData[xAxisToggle][stateName].total;
+                    //let y = usData[yAxisToggle][stateName].total;
+                    let x = undefined;
+                    let y = undefined;
+                    
+                    if (usData[xAxisToggle][stateName] && usData[yAxisToggle][stateName]) {
+                        x = usData[xAxisToggle][stateName].total;
+                        y = usData[yAxisToggle][stateName].total;
+                    } else {
+                        return;
+                    }
+
+                    console.log(x, y)
+                    console.log(xScale(x));
                     chartArea.append('circle')
-                            .attr('cx', xScale(d.total))
-                            .attr('cy', yScale(d.total))
+                            .attr('cx', xScale(x))
+                            .attr('cy', yScale(y))
                             .attr('r', 5)
                             .attr("fill", "red")
                             .attr('opacity', 1)
                             .attr('stroke', "darkred")
                             .attr('stroke-width', 1)
+                            .on("mouseover", function() {
+                                console.log(d3.select(this).datum())
+                                let name = d3.select(this).datum();
+                            })
+                            .on("mouseout", function() {
+                                   d3.selectAll("#label")
+                                     .text("");
+                            });
                 });
             }
 
@@ -724,6 +762,34 @@
             let xAxisToggle = 1; 
             let yAxisToggle = 0;
             updateLineGraph(xAxisToggle, yAxisToggle);
+
+            // x-axis toggle
+            const lineKeys = Object.keys(usData);
+            lineKeys.forEach(d => {
+                d3.select("div#line-button")
+                    .append("button")
+                    .attr("class", lineButtonLabels[d])
+                    .text(lineButtonLabels[d])
+                    .on("click", function () {
+                        xAxisToggle = Number(d);
+                        updateLineGraph(xAxisToggle, yAxisToggle);
+                    })
+            });
+
+
+            // y-axis toggle
+            lineKeys.forEach(d => {
+                d3.select("div#line-button2")
+                    .append("button")
+                    .attr("class", lineButtonLabels[d])
+                    .text(lineButtonLabels[d])
+                    .on("click", function () {
+                        yAxisToggle = Number(d);
+                        updateLineGraph(xAxisToggle, yAxisToggle);
+                    })
+            });
+
+
         }
         requestData();
     </script>
