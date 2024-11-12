@@ -116,12 +116,14 @@
     #button-bar button.health-spending {
         padding: 10px 20px;
         margin: 0 4px;
-        border: none;
+        border: 2px solid #11bc4a;
         border-radius: 4px;
-        background-color: #11bc4a;
+        background-color: white;
+        color: #11bc4a;
         cursor: pointer;
         font-family: serif;
         margin-bottom: 20%;
+        transition: 0.5s;
         /* transition-duration: 0.4s; */
         /* position: absolute; */
         /* top: 99%; */
@@ -129,20 +131,35 @@
         display: block
     }
 
+    #button-bar button.health-spending:hover,
+    #button-bar button.health-spending.active {
+        background-color: #11bc4a;
+        color: white;
+    }
+
     #button-bar button.covid-deaths {
         padding: 10px 20px;
         margin: 0 4px;
-        border: none;
+        border: 2px solid #ba1a5a;
         border-radius: 4px;
-        background-color: #ba1a5a;
+        background-color: white;
+        color: #ba1a5a;
         cursor: pointer;
         font-family: serif;
+        transition: 0.5s;
         /* transition-duration: 0.4s; */
         /* position: absolute; */
         /* top: 99%; */
         /* left: 99%; */
         display: block
     }
+
+    #button-bar button.covid-deaths:hover,
+    #button-bar button.covid-deaths.active {
+        background-color: #ba1a5a;
+        color: white;
+    }
+
 
     #button-bar button:hover {
         opacity: 0.9;
@@ -154,12 +171,11 @@
         display: flex;
         gap: 8px;
         padding: 10px;
-        background-color: white;
         border: none;
         border-radius: 4px;
         /* margin-top: 20px; */
         left: 50%;
-        top: 10;
+        top: -195;
         transform: translateX(-50%);
     }
 
@@ -193,7 +209,7 @@
             <!-- <div id="button-bar-state" style="display: none;"></div> -->
             <svg class="main-map" id="usmap" height="500" width="900" style="margin: auto 5px;
            float: left; "></svg>
-            <div class="usmap-description">Box holder</div>
+            <!-- <div class="usmap-description">Box holder</div> -->
             <svg class="colorLegend" id="colorLegend" height="100" width="300"
                 style="background: #fff; margin-top: 30%; margin-left: 1%;"></svg>
         </div>
@@ -222,19 +238,21 @@
 
         const buttonLabels = {
             0: "Health Spending \u{1F4B0}",
-            1: "COVID-19 Deaths \u{2620} "
+            1: "COVID-19 Deaths \u{2620} ",
+            2: "COVID-19 Cases  \u{2620} "
         }
         const buttonClasses = {
             0: "health-spending",
-            1: "covid-deaths"
+            1: "covid-deaths",
+            2: "covid-cases"
         }
 
         const stateButtonLabels = {
             0: "Total Cases",
-            1: "Total Deaths"
+            1: "Total Deaths",
         };
         const stateButtonClasses = {
-            0: "mask-usage",
+            0: "county-cases",
             1: "county-deaths"
         };
 
@@ -301,11 +319,6 @@
                     updateStateMap(d);
                 });
 
-            const nyState = states.features.find(d => d.properties.name === "New York")
-            if (nyState) {
-                // Initialize with New York
-                updateStateMap(nyState);
-            }
             usmap.append("path").datum(statesMesh)
                 .attr("class", "outline")
                 .attr("d", path1);
@@ -389,7 +402,12 @@
 
             // array of possible data sets for an individual state (county-level data)
             var countyData = [fipsCasesDict, fipsDeathsDict];
-
+            const nyState = states.features.find(d => d.properties.name === "New York")
+            if (nyState) {
+                // Initialize with New York
+                updateStateMap(nyState);
+                updateCountyData(nyState, 0);
+            }
             function updateCountyData(selectedState, countyToggle) {
                 const selectedDict = countyData[countyToggle];
 
@@ -401,6 +419,7 @@
                     .style("fill", d => {
                         const countyFips = d.id.toString();
                         const dataValue = selectedDict[countyFips];
+                        if (dataValue === 0) { return colorScale(0); }
                         return dataValue ? colorScale(dataValue) : "#ccc";
                     });
             }
@@ -443,11 +462,16 @@
                     .attr("class", buttonClasses[d])
                     .text(buttonLabels[d])
                     .on("click", function () {
+                        d3.selectAll("#button-bar button").classed("active", false);
+                        d3.select(this).classed("active", true)
                         currentUsToggle = Number(d);
                         updateUsScale(d);
                     })
 
             })
+
+            //init selected buttons
+            d3.select("#button-bar button").classed("active", true);
 
             // US map Mouseover tooltip stuff
             let ustooltipWidth = 110;
@@ -579,6 +603,8 @@
                 statemap.append("path").datum(countiesMesh)
                     .attr("class", "county-outline")
                     .attr("d", statePath);
+                updateCountyData(selectedState, 0);
+
 
 
                 // State map Mouseover tooltip stuff
