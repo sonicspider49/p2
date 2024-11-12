@@ -59,6 +59,12 @@
 
     }
 
+    #countyColorLegend {
+        position: absolute;
+        transform: translate(250px, 280px);
+    }
+
+
     .bottom-right {
         flex: 1;
         background-color: lightcoral;
@@ -113,6 +119,24 @@
         stroke-width: 1px
     }
 
+    #button-bar button {
+
+        width: 175px;
+
+        height: 50px;
+
+    }
+
+
+    #button-bar-state button {
+
+        width: 175px;
+
+        height: 50px;
+
+    }
+
+
     #button-bar button.health-spending {
         padding: 10px 20px;
         margin: 0 4px;
@@ -122,7 +146,7 @@
         color: #11bc4a;
         cursor: pointer;
         font-family: serif;
-        margin-bottom: 20%;
+        margin-bottom: 7%;
         transition: 0.5s;
         /* transition-duration: 0.4s; */
         /* position: absolute; */
@@ -145,6 +169,8 @@
         background-color: white;
         color: #ba1a5a;
         cursor: pointer;
+        margin-bottom: 7%;
+
         font-family: serif;
         transition: 0.5s;
         /* transition-duration: 0.4s; */
@@ -160,6 +186,68 @@
         color: white;
     }
 
+    #button-bar button.covid-cases {
+        padding: 10px 20px;
+        margin: 0 4px;
+        border: 2px solid #ba9d1a;
+        border-radius: 4px;
+        background-color: white;
+        color: #ba9d1a;
+        cursor: pointer;
+        font-family: serif;
+        transition: 0.5s;
+        /* transition-duration: 0.4s; */
+        /* position: absolute; */
+        /* top: 99%; */
+        /* left: 99%; */
+        display: block
+    }
+
+    #button-bar button.covid-cases:hover,
+    #button-bar button.covid-cases.active {
+        background-color: #ba9d1a;
+        color: white;
+    }
+
+
+    #button-bar-state button.county-cases {
+        padding: 10px 20px;
+        margin: 0 4px;
+        border: 2px solid #ba9d1a;
+        border-radius: 4px;
+        background-color: white;
+        color: #ba9d1a;
+        cursor: pointer;
+        font-family: serif;
+        transition: 0.5s;
+        display: block;
+    }
+
+    #button-bar-state button.county-cases:hover,
+    #button-bar-state button.county-cases.active {
+        background-color: #ba9d1a;
+        color: white;
+    }
+
+    #button-bar-state button.county-deaths {
+        padding: 10px 20px;
+        margin: 0 4px;
+        border: 2px solid #ba1a5a;
+        border-radius: 4px;
+        background-color: white;
+        color: #ba1a5a;
+        cursor: pointer;
+        font-family: serif;
+        transition: 0.5s;
+        display: block;
+    }
+
+    #button-bar-state button.county-deaths:hover,
+    #button-bar-state button.county-deaths.active {
+        background-color: #ba1a5a;
+        color: white;
+    }
+
 
     #button-bar button:hover {
         opacity: 0.9;
@@ -167,16 +255,11 @@
     }
 
     #button-bar-state {
-        position: relative;
         display: flex;
-        gap: 8px;
-        padding: 10px;
-        border: none;
-        border-radius: 4px;
-        /* margin-top: 20px; */
-        left: 50%;
-        top: -195;
-        transform: translateX(-50%);
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 20px;
     }
 
     .ustooltip {
@@ -212,6 +295,9 @@
             <!-- <div class="usmap-description">Box holder</div> -->
             <svg class="colorLegend" id="colorLegend" height="100" width="300"
                 style="background: #fff; margin-top: 30%; margin-left: 1%;"></svg>
+
+
+
         </div>
 
 
@@ -219,6 +305,8 @@
             <div class="bottom-left">
                 <div id="button-bar-state"></div>
                 <svg id="statemap" height="600" width="500"></svg>
+                <svg class="countyColorLegend" id="countyColorLegend" height="100" width="300"></svg>
+
             </div>
             <div class="bottom-right">
                 <div class="lineButtons" id="line-button"></div>
@@ -239,7 +327,7 @@
         const buttonLabels = {
             0: "Health Spending \u{1F4B0}",
             1: "COVID-19 Deaths \u{2620} ",
-            2: "COVID-19 Cases  \u{2620} "
+            2: "COVID-19 Cases  \u{26A0} "
         }
         const buttonClasses = {
             0: "health-spending",
@@ -248,8 +336,8 @@
         }
 
         const stateButtonLabels = {
-            0: "Total Cases",
-            1: "Total Deaths",
+            0: "Total Cases \u{2620}",
+            1: "Total Deaths \u{26A0}",
         };
         const stateButtonClasses = {
             0: "county-cases",
@@ -422,6 +510,13 @@
                         if (dataValue === 0) { return colorScale(0); }
                         return dataValue ? colorScale(dataValue) : "#ccc";
                     });
+
+                const formatValue = countyToggle === 0
+                    ? d3.format(",d")
+                    : d3.format(",d");
+
+                drawLegend("#countyColorLegend", colorScale, formatValue, true);
+
             }
 
             function updateUsScale(usToggle) {
@@ -519,8 +614,15 @@
                 // make label appear with name of state & value of data (can't figure out how to get data)
                 let location = d3.pointer(event);
                 let name = state.datum().properties.name;
-                let stateDict = (currentUsToggle === 0) ? healthSpendingDict : covidDeathsDict;
-                let value = stateDict[name].total;
+                let stateDict;
+                if (currentUsToggle === 1) {
+                    stateDict = covidDeathsDict;
+                } else if (currentUsToggle === 2) {
+                    stateDict = covidCasesDict;
+                } else {
+                    stateDict = healthSpendingDict;
+
+                } let value = stateDict[name].total;
 
 
                 var dollarform = d3.format("$,.0f")
@@ -573,10 +675,16 @@
                         .attr("class", stateButtonClasses[i])
                         .text(stateButtonLabels[i])
                         .on("click", function () {
+                            d3.selectAll("#button-bar-state button").classed("active", false);
+                            d3.select(this).classed("active", true)
                             currentStateToggle = parseInt(i);
                             updateCountyData(selectedState, currentStateToggle);
                         });
+
+
                 });
+                d3.select("#button-bar-state button").classed("active", true);
+
 
 
                 let selectedCounties = us.objects.counties.geometries.filter(function (d) { return selectedState.id == Math.floor(d.id / 1000) });
@@ -865,7 +973,7 @@
     <script>
         // Flexible legend-drawing function - Jeff Rzeszotarski, 2022
         //   Released under MIT Free license
-        function drawLegend(legendSelector, legendColorScale, formatValue) {
+        function drawLegend(legendSelector, legendColorScale, formatValue, useQuantize = false) {
             d3.select(legendSelector).selectAll("*").remove(); //need this to prevent overlap
 
 
