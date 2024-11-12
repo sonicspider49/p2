@@ -334,10 +334,12 @@
             });
 
             // covid deaths data dictionary, by county
-            console.log("dateeeee", latestCovidData)
             var fipsDeathsDict = {};
             latestCovidData.forEach(d => {
-                const fips = d.fips;
+                // Ensure the FIPS code is always 5 digits long by padding with leading zeros
+                if (d.fips == null) return;
+                const fips = d.fips.toString().padStart(5, '0');
+
                 if (fips in fipsDeathsDict) {
                     fipsDeathsDict[fips] += d.deaths;
                 } else {
@@ -345,10 +347,12 @@
                 }
             });
 
+
             // covid cases data dictionary, by county
             var fipsCasesDict = {};
             latestCovidData.forEach(d => {
-                const fips = d.fips;
+                if (d.fips == null) return;
+                const fips = d.fips.toString().padStart(5, '0');
                 if (fips in fipsCasesDict) {
                     fipsCasesDict[fips] += d.cases;
                 } else {
@@ -382,21 +386,6 @@
 
             // array of possible data sets for the US (state-level data)
             var usData = [healthSpendingDict, covidDeathsDict, covidCasesDict];
-
-            // const maskUsageData = await d3.csv("mask-use-by-county.csv");
-
-            // const maskUsageDict = {};
-
-            // maskUsageData.forEach(d => {
-            //     maskUsageDict[d.COUNTYFP] = {
-            //         never: parseFloat(d.NEVER),
-            //         rarely: parseFloat(d.RARELY),
-            //         sometimes: parseFloat(d.SOMETIMES),
-            //         frequently: parseFloat(d.FREQUENTLY),
-            //         always: parseFloat(d.ALWAYS)
-            //     };
-            // });
-            // console.log("Mask Usage of 53061:", maskUsageDict["53061"]);
 
             // array of possible data sets for an individual state (county-level data)
             var countyData = [fipsCasesDict, fipsDeathsDict];
