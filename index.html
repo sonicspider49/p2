@@ -632,7 +632,7 @@
 
                 let bounds = path1.bounds(state.datum());
                 let x = (bounds[0][0] + bounds[1][0]) / 2.0;
-                let y = bounds[1][1] - 15;
+                let y = bounds[1][1];
                 ustooltip.attr("transform", `translate(${x},${y})`);
                 var mo = topojson.mesh(us, us.objects.states, function (a, b) { return a.id === name || b.id === name; });
                 usMouseoverMesh.datum(mo).attr("d", path1)
@@ -770,7 +770,7 @@
 
                     let bounds = statePath.bounds(county.datum());
                     let x = (bounds[0][0] + bounds[1][0]) / 2.0;
-                    let y = bounds[1][1] - 15;
+                    let y = bounds[1][1];
                     statetooltip.attr("transform", `translate(${x},${y})`);
                     var mo = topojson.mesh(us, { type: "GeometryCollection", geometries: selectedCounties }, function (a, b) { return a.id === name || b.id === name; });
                     stateMouseoverMesh.datum(mo).attr("d", statePath)
