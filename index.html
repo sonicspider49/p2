@@ -313,7 +313,7 @@
                 <div class="lineButtons2" id="line-button2"></div>
                 <!-- <div id="line-button"></div> -->
 
-                <svg class="lineChart" id="chart" height="600" width="500"></svg>
+                <svg class="lineChart" id="chart" height="550" width="600"></svg>
                 <!-- <svg id="statemap" height="500" width="500" style="margin:20px"></svg> -->
                 <!-- <svg id="colorLegend" height="80" width="600" style="background: #fff; margin-top:30px"></svg> -->
             </div>
@@ -355,7 +355,7 @@
         const svg1 = d3.select('svg#usmap');
         const width1 = svg1.attr('width');
         const height1 = svg1.attr('height');
-        const margins1 = { top: 20, right: 20, bottom: 20, left: 20 };
+        const margins1 = { top: 20, right: 20, bottom: 30, left: 20 };
         const mapWidth1 = width1 - margins1.left - margins1.right;
         const mapHeight1 = height1 - margins1.top - margins1.bottom;
         const usmap = svg1.append("g")
@@ -365,7 +365,7 @@
         const svg2 = d3.select('svg#statemap');
         const width2 = svg2.attr('width');
         const height2 = svg2.attr('height');
-        const margins2 = { top: 20, right: 20, bottom: 20, left: 20 };
+        const margins2 = { top: 20, right: 75, bottom: 30, left: 50 };
         const mapWidth2 = width2 - margins2.left - margins2.right;
         const mapHeight2 = height2 - margins2.top - margins2.bottom;
         const statemap = svg2.append("g")
@@ -376,7 +376,7 @@
         const svg3 = d3.select('svg#chart');
         const width3 = svg3.attr('width');
         const height3 = svg3.attr('height');
-        const margins3 = { top: 20, right: 20, bottom: 50, left: 50 };
+        const margins3 = { top: 25, right: 75, bottom: 50, left: 50 };
         const chartWidth = width3 - margins3.left - margins3.right;
         const chartHeight = height3 - margins3.top - margins3.bottom;
         let annotations = svg3.append("g").attr("id", "annotations");
@@ -716,7 +716,7 @@
 
 
                 // State map Mouseover tooltip stuff
-                let statetooltipWidth = 110;
+                let statetooltipWidth = 160;
                 let statetooltipHeight = 40;
                 let stateMouseoverMesh = statemap.append("path")
                     .attr("class", "statemouseover outline")
