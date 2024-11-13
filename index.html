@@ -336,8 +336,8 @@
         }
 
         const stateButtonLabels = {
-            0: "Total Cases \u{2620}",
-            1: "Total Deaths \u{26A0}",
+            0: "Total Cases \u{26A0}",
+            1: "Total Deaths  \u{2620}",
         };
         const stateButtonClasses = {
             0: "county-cases",
@@ -896,6 +896,9 @@
                     }
 
                     console.log(x, y)
+
+                    var label = svg3.append("text").attr("id", "label");
+
                     chartArea.append('circle')
                         .attr('cx', xScale(x))
                         .attr('cy', yScale(y))
@@ -906,20 +909,17 @@
                         .attr('stroke-width', 1)
                         // fix mouseover to show name of state
                         .on("mouseover", function () {
-                            charttooltip.style("visibility", "visible")
                             d3.select(this).attr("fill", "green");
 
-                            circleLabel.text(stateName)
-                                .style("font-size", "12px")
-                                .style("fill", "black");
-                            let textx = xScale(x) + margins3.left;
-                            let texty = yScale(y) + margins3.top;
+                            let textx = xScale(x) + margins3.left + 5;
+                            let texty = yScale(y) + margins3.top + -10;
                             console.log(textx, texty);
                             console.log(stateName);
-                            charttooltip.attr("transform", `translate(${textx},${texty})`);
+                            label.attr("x", textx).attr("y", texty).text(stateName);
+
                         })
                         .on("mouseout", function () {
-                            ustooltip.style("visibility", "hidden");
+                            label.text("")
                             d3.select(this).attr("fill", "red");
                         });
                 });
