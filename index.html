@@ -293,7 +293,7 @@
             <svg class="main-map" id="usmap" height="500" width="900" style="margin: auto 5px;
            float: left; "></svg>
             <!-- <div class="usmap-description">Box holder</div> -->
-            <svg class="colorLegend" id="colorLegend" height="100" width="300"
+            <svg class="colorLegend" id="colorLegend" height="100" width="420"
                 style="margin-top: 30%; margin-left: 1%;"></svg>
 
 
@@ -313,7 +313,7 @@
                 <div class="lineButtons2" id="line-button2"></div>
                 <!-- <div id="line-button"></div> -->
 
-                <svg class="lineChart" id="chart" height="550" width="600"></svg>
+                <svg class="lineChart" id="chart" height="535" width="600"></svg>
                 <!-- <svg id="statemap" height="500" width="500" style="margin:20px"></svg> -->
                 <!-- <svg id="colorLegend" height="80" width="600" style="background: #fff; margin-top:30px"></svg> -->
             </div>
@@ -345,9 +345,9 @@
         };
 
         const lineButtonLabels = {
-            0: "Health Spending per Capita",
-            1: "Cumulative COVID-19 Deaths in 2020",
-            2: "Cumulative COVID-19 Deaths in 2020"
+            0: "Health Spending",
+            1: "COVID-19 Deaths",
+            2: "COVID-19 Cases"
         };
 
 
@@ -365,7 +365,7 @@
         const svg2 = d3.select('svg#statemap');
         const width2 = svg2.attr('width');
         const height2 = svg2.attr('height');
-        const margins2 = { top: 20, right: 75, bottom: 42, left: 50 };
+        const margins2 = { top: 20, right: 75, bottom: 42, left: 65 };
         const mapWidth2 = width2 - margins2.left - margins2.right;
         const mapHeight2 = height2 - margins2.top - margins2.bottom;
         const statemap = svg2.append("g")
@@ -376,7 +376,7 @@
         const svg3 = d3.select('svg#chart');
         const width3 = svg3.attr('width');
         const height3 = svg3.attr('height');
-        const margins3 = { top: 25, right: 75, bottom: 50, left: 50 };
+        const margins3 = { top: 35, right: 75, bottom: 50, left: 80 };
         const chartWidth = width3 - margins3.left - margins3.right;
         const chartHeight = height3 - margins3.top - margins3.bottom;
         let annotations = svg3.append("g").attr("id", "annotations");
@@ -501,7 +501,8 @@
 
                 const colorScale = d3.scaleQuantile()
                     .domain(Object.values(selectedDict))
-                    .range(["#fff5f0", "#fcbba1", "#fc9272", "#fb6a4a", "#cb181d"]);
+                    .range(["#fff5f0", "#fcbba1", "#fb6a4a", "#cb181d"]);
+                    //.range(["#fff5f0", "#fcbba1", "#fc9272", "#fb6a4a", "#cb181d"]);
 
                 statemap.selectAll(".county")
                     .style("fill", d => {
@@ -530,6 +531,8 @@
 
                 const colorScale = d3.scaleQuantile()
                     .domain(Object.values(stateDict).map(d => d.total))
+                    // can just do 4 bins to reduce legend overlap
+                    //.range(["#fff", "#adc2da", "#8879b3", "#762b80"]); 
                     .range(["#fff", "#d1e8ed", "#adc2da", "#8879b3", "#762b80"]);
 
                 usmap.selectAll(".state")
@@ -610,7 +613,6 @@
                 let state = d3.select(this);
                 state.style("stroke-width", "4px");
 
-
                 // make label appear with name of state & value of data (can't figure out how to get data)
                 let location = d3.pointer(event);
                 let name = state.datum().properties.name;
@@ -644,7 +646,6 @@
                 ustooltip.style("visibility", "hidden");
                 let state = d3.select(this);
                 state.style("stroke-width", "1px");
-
 
                 usMouseoverMesh.attr("d", "");
             }
@@ -834,7 +835,7 @@
                     .range([chartHeight, 0]);
 
                 // axes
-                let labels = ["Health Spending per Capita",
+                let labels = ["Health Spending ($ per Capita)",
                     "Cumulative COVID-19 Deaths in 2020",
                     "Cumulative COVID-19 Cases in 2020"];
 
@@ -853,7 +854,7 @@
                     .call(leftGridlines);
                 // y axis label
                 svg3.append("text").text(labels[yAxisToggle])
-                    .attr("x", -chartHeight + 10)
+                    .attr("x", -chartHeight + 70)
                     .attr("y", 10)
                     .style("font-size", "15px")
                     .attr("transform", "rotate(-90)");
@@ -897,30 +898,35 @@
 
                     console.log(x, y)
 
-                    var label = svg3.append("text").attr("id", "label");
+                    var label = svg3.append("text")
+                                    .attr("id", "label")
+                                    .attr("font-size", 17);
 
                     chartArea.append('circle')
                         .attr('cx', xScale(x))
                         .attr('cy', yScale(y))
-                        .attr('r', 6)
+                        .attr('r', 5)
                         .attr("fill", "red")
                         .attr('opacity', 1)
                         .attr('stroke', "darkred")
                         .attr('stroke-width', 1)
-                        // fix mouseover to show name of state
+                        // on mouseover change color & size, show name of state
                         .on("mouseover", function () {
-                            d3.select(this).attr("fill", "green");
+                            d3.select(this).attr("fill", "green")
+                                           .attr("r", 8)
+                                           .raise();
 
                             let textx = xScale(x) + margins3.left + 5;
                             let texty = yScale(y) + margins3.top + -10;
                             console.log(textx, texty);
                             console.log(stateName);
                             label.attr("x", textx).attr("y", texty).text(stateName);
-
+                            
                         })
                         .on("mouseout", function () {
                             label.text("")
-                            d3.select(this).attr("fill", "red");
+                            d3.select(this).attr("fill", "red")
+                                            .attr("r", 5);
                         });
                 });
             }
