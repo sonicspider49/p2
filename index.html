@@ -305,7 +305,7 @@
             <div class="bottom-left">
                 <div id="button-bar-state"></div>
                 <svg id="statemap" height="600" width="500"></svg>
-                <svg class="countyColorLegend" id="countyColorLegend" height="100" width="300"></svg>
+                <svg class="countyColorLegend" id="countyColorLegend" height="100" width="400"></svg>
 
             </div>
             <div class="bottom-right">
@@ -426,6 +426,9 @@
                 healthSpendingDict[d.Location] = { total: spending };
             });
 
+            // import population data
+            const popData = await d3.csv("us_pop_by_state.csv", d3.autoType);
+
             // import COVID data
             const covidData = await d3.csv("us-counties-2020.csv", d3.autoType);
 
@@ -448,7 +451,6 @@
                 }
             });
 
-
             // covid cases data dictionary, by county
             var fipsCasesDict = {};
             latestCovidData.forEach(d => {
@@ -461,7 +463,7 @@
                 }
             });
 
-            // covid deaths data - SUM UP LATESTCOVIDDATA FROM COUNTIES FOR EACH STATE
+            // covid deaths data - latestCovidData summed up for counties in each state
             var covidDeathsDict = {};
             latestCovidData.forEach(d => {
                 if (d.state in covidDeathsDict) {
@@ -471,7 +473,16 @@
                 }
             });
 
-            // covid cases data - SUM UP LATESTCOVIDDATA FROM COUNTIES FOR EACH STATE
+            // *** covid deaths normalized to population size (in %)
+            var percentDeathsDict = {};
+            popData.forEach(d => {
+                if (d.state in covidDeathsDict) {
+                    // multiply by another 100 and say data unit is x10^2 ? 
+                    percentDeathsDict[d.state] = { total: 100*100*(covidDeathsDict[d.state].total / d['2020_census'])}
+                } else {}
+            })
+
+            // covid cases data - latestCovidData summed up for counties in each state
             var covidCasesDict = {};
             latestCovidData.forEach(d => {
                 if (d.state in covidCasesDict) {
@@ -481,45 +492,26 @@
                 }
             });
 
+            // *** covid cases normalized to population size (in %)
+            var percentCasesDict = {};
+            popData.forEach(d => {
+                if (d.state in covidCasesDict) {
+                    percentCasesDict[d.state] = { total: 100*(covidCasesDict[d.state].total / d['2020_census'])}
+                } else {}
+            })
+
+            console.log(percentDeathsDict);
+            console.log(percentCasesDict);
+
             console.log(healthSpendingDict);
             console.log(covidDeathsDict);
             console.log(covidCasesDict);
 
             // array of possible data sets for the US (state-level data)
             var usData = [healthSpendingDict, covidDeathsDict, covidCasesDict];
+            //***var usData = [healthSpendingDict, percentDeathsDict, percentCasesDict];
 
-            // array of possible data sets for an individual state (county-level data)
-            var countyData = [fipsCasesDict, fipsDeathsDict];
-            const nyState = states.features.find(d => d.properties.name === "New York")
-            if (nyState) {
-                // Initialize with New York
-                updateStateMap(nyState);
-                updateCountyData(nyState, 0);
-            }
-            function updateCountyData(selectedState, countyToggle) {
-                const selectedDict = countyData[countyToggle];
-
-                const colorScale = d3.scaleQuantile()
-                    .domain(Object.values(selectedDict))
-                    .range(["#fff5f0", "#fcbba1", "#fb6a4a", "#cb181d"]);
-                    //.range(["#fff5f0", "#fcbba1", "#fc9272", "#fb6a4a", "#cb181d"]);
-
-                statemap.selectAll(".county")
-                    .style("fill", d => {
-                        const countyFips = d.id.toString();
-                        const dataValue = selectedDict[countyFips];
-                        if (dataValue === 0) { return colorScale(0); }
-                        return dataValue ? colorScale(dataValue) : "#ccc";
-                    });
-
-                const formatValue = countyToggle === 0
-                    ? d3.format(",d")
-                    : d3.format(",d");
-
-                drawLegend("#countyColorLegend", colorScale, formatValue, true);
-
-            }
-
+        
             function updateUsScale(usToggle) {
 
                 const formatValue = usToggle == 0
@@ -546,7 +538,6 @@
                     });
                 drawLegend("#colorLegend", colorScale, formatValue)
             }
-
 
             // initialize us map
             let currentUsToggle = 0; // show health spending data initially
@@ -608,29 +599,27 @@
             // mouseoverState function to show name of state and amount of money on mouseover
             function mouseoverState(event, d) {
                 ustooltip.style("visibility", "visible")
-
-
                 let state = d3.select(this);
                 state.style("stroke-width", "4px");
 
-                // make label appear with name of state & value of data (can't figure out how to get data)
+                // state name & data label
                 let location = d3.pointer(event);
                 let name = state.datum().properties.name;
-                let stateDict;
-                if (currentUsToggle === 1) {
-                    stateDict = covidDeathsDict;
-                } else if (currentUsToggle === 2) {
-                    stateDict = covidCasesDict;
-                } else {
-                    stateDict = healthSpendingDict;
+                stateDict = usData[currentUsToggle];
 
-                } let value = stateDict[name].total;
+                //if (currentUsToggle === 1) {
+                //    stateDict = covidDeathsDict;
+                //} else if (currentUsToggle === 2) {
+                //    stateDict = covidCasesDict;
+                //} else {
+                //    stateDict = healthSpendingDict;
+                //} 
 
+                let value = stateDict[name].total;
 
                 var dollarform = d3.format("$,.0f")
                 stateLabel.text(name);
                 usDataLabel.text((currentUsToggle === 0) ? dollarform(value) : d3.format(",d")(value));
-
 
                 let bounds = path1.bounds(state.datum());
                 let x = (bounds[0][0] + bounds[1][0]) / 2.0;
@@ -640,8 +629,7 @@
                 usMouseoverMesh.datum(mo).attr("d", path1)
             }
 
-
-            // write mouseoutState function to get rid of label
+            // get rid of label and reset state attributes
             function mouseoutState() {
                 ustooltip.style("visibility", "hidden");
                 let state = d3.select(this);
@@ -652,8 +640,39 @@
 
             // VISUALIZATION 2
 
+             // array of possible data sets for an individual state (county-level data)
+             var countyData = [fipsCasesDict, fipsDeathsDict];
 
-            // move county data stuff here
+            // Initialize with New York
+             const nyState = states.features.find(d => d.properties.name === "New York")
+             if (nyState) {
+                 updateStateMap(nyState);
+                 updateCountyData(nyState, 0);
+             }
+
+             function updateCountyData(selectedState, countyToggle) {
+                 const selectedDict = countyData[countyToggle];
+                 
+                // fix color scale to calculate using only the county data from the selectedState ***
+                 const colorScale = d3.scaleQuantile()
+                     .domain(Object.values(selectedDict))
+                     //.range(["#fff5f0", "#fcbba1", "#fb6a4a", "#cb181d"]);
+                     .range(["#fff5f0", "#fcbba1", "#fc9272", "#fb6a4a", "#cb181d"]);
+ 
+                 statemap.selectAll(".county")
+                     .style("fill", d => {
+                         const countyFips = d.id.toString();
+                         const dataValue = selectedDict[countyFips];
+                         if (dataValue === 0) { return colorScale(0); }
+                         return dataValue ? colorScale(dataValue) : "#ccc";
+                     });
+ 
+                 const formatValue = countyToggle === 0
+                     ? d3.format(",d")
+                     : d3.format(",d");
+ 
+                 drawLegend("#countyColorLegend", colorScale, formatValue, true);
+             }
 
             // write updateState function to update map 2 with county-level COVID data for selected state
             function updateStateMap(selectedState) {
@@ -681,11 +700,9 @@
                             currentStateToggle = parseInt(i);
                             updateCountyData(selectedState, currentStateToggle);
                         });
-
-
                 });
-                d3.select("#button-bar-state button").classed("active", true);
 
+                d3.select("#button-bar-state button").classed("active", true);
 
 
                 let selectedCounties = us.objects.counties.geometries.filter(function (d) { return selectedState.id == Math.floor(d.id / 1000) });
@@ -713,8 +730,6 @@
                     .attr("class", "county-outline")
                     .attr("d", statePath);
                 updateCountyData(selectedState, 0);
-
-
 
                 // State map Mouseover tooltip stuff
                 let statetooltipWidth = 160;
