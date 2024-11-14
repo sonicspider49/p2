@@ -17,6 +17,7 @@
         display: flex;
         justify-content: center;
         align-items: center;
+
     }
 
     .container {
@@ -43,7 +44,7 @@
     .bottom-right {
         display: flex;
         justify-content: center;
-        height: 100vh;
+        height: 100%;
         align-items: flex-start;
     }
 
@@ -52,9 +53,7 @@
         background-color: lightgreen;
         display: flex;
         justify-content: flex-start;
-        /* Align the SVG to the left */
-        align-items: center;
-        /* Keep the vertical centering */
+        /* align-items: center; */
         height: 100%;
 
     }
@@ -68,7 +67,11 @@
     .bottom-right {
         flex: 1;
         background-color: lightcoral;
-        position: relative;
+        /* position: relative; */
+        /* display: flex; */
+        justify-content: flex-start;
+        /* align-items: center; */
+        height: 100%;
     }
 
     .main-title {
@@ -104,12 +107,10 @@
     .statemap {
         fill: white;
         position: relative;
-        /* display: flex; */
         gap: 8px;
         padding: 10px;
         border: none;
         border-radius: 4px;
-        /* margin-top: 40px; */
         top: 99%;
     }
 
@@ -119,25 +120,35 @@
         stroke-width: 1px
     }
 
-    #button-bar button {
-
+    #button-bar button,
+    #button-bar-state button,
+    #line-button button,
+    #line-button2 button {
         width: 175px;
-
         height: 50px;
 
     }
 
 
-    #button-bar-state button {
 
-        width: 175px;
-
-        height: 50px;
+    #line-button,
+    #line-button2 {
+        position: relative;
+        top: 97%;
+        /* Adjust this value to bring the buttons closer to the bottom */
+        left: 25%;
+        transform: translateX(-50%);
+        /* margin-top: 80%; */
+        /* position: relative; */
 
     }
 
 
-    #button-bar button.health-spending {
+
+
+    #button-bar button.health-spending,
+    #line-button button.health-spending,
+    #line-button2 button.health-spending {
         padding: 10px 20px;
         margin: 0 4px;
         border: 2px solid #11bc4a;
@@ -155,13 +166,25 @@
         display: block
     }
 
+
+
+
+
     #button-bar button.health-spending:hover,
-    #button-bar button.health-spending.active {
+    #button-bar button.health-spending.active,
+    #line-button button.health-spending:hover,
+    #line-button button.health-spending.active,
+    #line-button2 button.health-spending:hover,
+    #line-button2 button.health-spending.active {
         background-color: #11bc4a;
         color: white;
     }
 
-    #button-bar button.covid-deaths {
+
+
+    #button-bar button.covid-deaths,
+    #line-button button.covid-deaths,
+    #line-button2 button.covid-deaths {
         padding: 10px 20px;
         margin: 0 4px;
         border: 2px solid #ba1a5a;
@@ -180,13 +203,22 @@
         display: block
     }
 
+
+
     #button-bar button.covid-deaths:hover,
-    #button-bar button.covid-deaths.active {
+    #button-bar button.covid-deaths.active,
+    #line-button button.covid-deaths:hover,
+    #line-button button.covid-deaths.active,
+    #line-button2 button.covid-deaths:hover,
+    #line-button2 button.covid-deaths.active {
         background-color: #ba1a5a;
         color: white;
     }
 
-    #button-bar button.covid-cases {
+
+    #button-bar button.covid-cases,
+    #line-button button.covid-cases,
+    #line-button2 button.covid-cases {
         padding: 10px 20px;
         margin: 0 4px;
         border: 2px solid #ba9d1a;
@@ -204,7 +236,11 @@
     }
 
     #button-bar button.covid-cases:hover,
-    #button-bar button.covid-cases.active {
+    #button-bar button.covid-cases.active,
+    #line-button button.covid-cases:hover,
+    #line-button button.covid-cases.active,
+    #line-button2 button.covid-cases:hover,
+    #line-button2 button.covid-cases.active {
         background-color: #ba9d1a;
         color: white;
     }
@@ -254,22 +290,30 @@
         color: rgb(162, 234, 236)
     }
 
+    #line-button button:hover {
+        opacity: 0.9;
+        color: rgb(162, 234, 236)
+    }
+
+    #line-button2 button:hover {
+        opacity: 0.9;
+        color: rgb(162, 234, 236)
+    }
+
     #button-bar-state {
         display: flex;
         flex-direction: column;
         align-items: flex-start;
         gap: 10px;
         padding: 20px;
+        left: 15%;
+        position: relative;
+
+
     }
 
-    .ustooltip {
-        pointer-events: none;
-    }
-
-    .statetooltip {
-        pointer-events: none;
-    }
-
+    .ustooltip,
+    .statetooltip,
     .charttooltip {
         pointer-events: none;
     }
@@ -279,8 +323,10 @@
     }
 
     .lineChart {
-        position: absolute;
+        position: relative;
         top: 30px;
+        right: 35%;
+
     }
 </style>
 
@@ -309,8 +355,8 @@
 
             </div>
             <div class="bottom-right">
-                <div class="lineButtons" id="line-button"></div>
-                <div class="lineButtons2" id="line-button2"></div>
+                <div id="line-button"></div>
+                <div id="line-button2"></div>
                 <!-- <div id="line-button"></div> -->
 
                 <svg class="lineChart" id="chart" height="535" width="600"></svg>
@@ -345,9 +391,15 @@
         };
 
         const lineButtonLabels = {
-            0: "Health Spending",
-            1: "COVID-19 Deaths",
-            2: "COVID-19 Cases"
+            0: "Health Spending \u{1F4B0}",
+            1: "COVID-19 Deaths \u{2620} ",
+            2: "COVID-19 Cases  \u{26A0} "
+        };
+
+        const lineButtonClasses = {
+            0: "health-spending",
+            1: "covid-deaths",
+            2: "covid-cases"
         };
 
 
@@ -478,8 +530,8 @@
             popData.forEach(d => {
                 if (d.state in covidDeathsDict) {
                     // multiply by another 100 and say data unit is x10^2 ? 
-                    percentDeathsDict[d.state] = { total: 100*100*(covidDeathsDict[d.state].total / d['2020_census'])}
-                } else {}
+                    percentDeathsDict[d.state] = { total: 100 * 100 * (covidDeathsDict[d.state].total / d['2020_census']) }
+                } else { }
             })
 
             // covid cases data - latestCovidData summed up for counties in each state
@@ -496,8 +548,8 @@
             var percentCasesDict = {};
             popData.forEach(d => {
                 if (d.state in covidCasesDict) {
-                    percentCasesDict[d.state] = { total: 100*(covidCasesDict[d.state].total / d['2020_census'])}
-                } else {}
+                    percentCasesDict[d.state] = { total: 100 * (covidCasesDict[d.state].total / d['2020_census']) }
+                } else { }
             })
 
             console.log(percentDeathsDict);
@@ -511,7 +563,7 @@
             var usData = [healthSpendingDict, covidDeathsDict, covidCasesDict];
             //***var usData = [healthSpendingDict, percentDeathsDict, percentCasesDict];
 
-        
+
             function updateUsScale(usToggle) {
 
                 const formatValue = usToggle == 0
@@ -640,39 +692,39 @@
 
             // VISUALIZATION 2
 
-             // array of possible data sets for an individual state (county-level data)
-             var countyData = [fipsCasesDict, fipsDeathsDict];
+            // array of possible data sets for an individual state (county-level data)
+            var countyData = [fipsCasesDict, fipsDeathsDict];
 
             // Initialize with New York
-             const nyState = states.features.find(d => d.properties.name === "New York")
-             if (nyState) {
-                 updateStateMap(nyState);
-                 updateCountyData(nyState, 0);
-             }
+            const nyState = states.features.find(d => d.properties.name === "New York")
+            if (nyState) {
+                updateStateMap(nyState);
+                updateCountyData(nyState, 0);
+            }
 
-             function updateCountyData(selectedState, countyToggle) {
-                 const selectedDict = countyData[countyToggle];
-                 
+            function updateCountyData(selectedState, countyToggle) {
+                const selectedDict = countyData[countyToggle];
+
                 // fix color scale to calculate using only the county data from the selectedState ***
-                 const colorScale = d3.scaleQuantile()
-                     .domain(Object.values(selectedDict))
-                     //.range(["#fff5f0", "#fcbba1", "#fb6a4a", "#cb181d"]);
-                     .range(["#fff5f0", "#fcbba1", "#fc9272", "#fb6a4a", "#cb181d"]);
- 
-                 statemap.selectAll(".county")
-                     .style("fill", d => {
-                         const countyFips = d.id.toString();
-                         const dataValue = selectedDict[countyFips];
-                         if (dataValue === 0) { return colorScale(0); }
-                         return dataValue ? colorScale(dataValue) : "#ccc";
-                     });
- 
-                 const formatValue = countyToggle === 0
-                     ? d3.format(",d")
-                     : d3.format(",d");
- 
-                 drawLegend("#countyColorLegend", colorScale, formatValue, true);
-             }
+                const colorScale = d3.scaleQuantile()
+                    .domain(Object.values(selectedDict))
+                    //.range(["#fff5f0", "#fcbba1", "#fb6a4a", "#cb181d"]);
+                    .range(["#fff5f0", "#fcbba1", "#fc9272", "#fb6a4a", "#cb181d"]);
+
+                statemap.selectAll(".county")
+                    .style("fill", d => {
+                        const countyFips = d.id.toString();
+                        const dataValue = selectedDict[countyFips];
+                        if (dataValue === 0) { return colorScale(0); }
+                        return dataValue ? colorScale(dataValue) : "#ccc";
+                    });
+
+                const formatValue = countyToggle === 0
+                    ? d3.format(",d")
+                    : d3.format(",d");
+
+                drawLegend("#countyColorLegend", colorScale, formatValue, true);
+            }
 
             // write updateState function to update map 2 with county-level COVID data for selected state
             function updateStateMap(selectedState) {
@@ -914,8 +966,8 @@
                     console.log(x, y)
 
                     var label = svg3.append("text")
-                                    .attr("id", "label")
-                                    .attr("font-size", 17);
+                        .attr("id", "label")
+                        .attr("font-size", 17);
 
                     chartArea.append('circle')
                         .attr('cx', xScale(x))
@@ -928,20 +980,20 @@
                         // on mouseover change color & size, show name of state
                         .on("mouseover", function () {
                             d3.select(this).attr("fill", "green")
-                                           .attr("r", 8)
-                                           .raise();
+                                .attr("r", 8)
+                                .raise();
 
                             let textx = xScale(x) + margins3.left + 5;
                             let texty = yScale(y) + margins3.top + -10;
                             console.log(textx, texty);
                             console.log(stateName);
                             label.attr("x", textx).attr("y", texty).text(stateName);
-                            
+
                         })
                         .on("mouseout", function () {
                             label.text("")
                             d3.select(this).attr("fill", "red")
-                                            .attr("r", 5);
+                                .attr("r", 5);
                         });
                 });
             }
@@ -953,10 +1005,11 @@
 
             // x-axis toggle
             const lineKeys = Object.keys(usData);
-            lineKeys.forEach(d => {
+            Object.keys(lineButtonLabels).forEach(d => {
+                // lineKeys.forEach(d => {
                 d3.select("div#line-button")
                     .append("button")
-                    .attr("class", lineButtonLabels[d])
+                    .attr("class", lineButtonClasses[d])
                     .text(lineButtonLabels[d])
                     .on("click", function () {
                         xAxisToggle = Number(d);
@@ -971,10 +1024,10 @@
 
 
             // y-axis toggle
-            lineKeys.forEach(d => {
+            Object.keys(lineButtonLabels).forEach(d => {
                 d3.select("div#line-button2")
                     .append("button")
-                    .attr("class", lineButtonLabels[d])
+                    .attr("class", lineButtonClasses[d])
                     .text(lineButtonLabels[d])
                     .on("click", function () {
                         yAxisToggle = Number(d);
