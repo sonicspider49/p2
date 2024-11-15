@@ -47,7 +47,6 @@
     .bottom-right {
         display: flex;
         justify-content: center;
-        height: 100%;
         align-items: flex-start;
     }
 
@@ -57,8 +56,11 @@
         display: flex;
         justify-content: flex-start;
         /* align-items: center; */
-        height: 100%;
+        /* height: 100%; */
         border-right: 2px solid black;
+
+        height: 900px;
+        position: relative;
 
     }
 
@@ -143,14 +145,23 @@
         position: absolute;
     }
 
-    #line-button,
-    #line-button2 {
+    #line-button {
         position: relative;
-        top: 97%;
+        top: 67%;
         left: 25%;
         transform: translateX(-50%);
         /* margin-top: 80%; */
         /* position: relative; */
+    }
+
+    #line-button2 {
+        position: relative;
+        top: 17%;
+        left: -8%;
+        transform: translateX(-50%);
+        /* margin-top: 80%; */
+        /* position: relative; */
+
     }
 
     #button-bar button.health-spending,
@@ -305,8 +316,6 @@
         padding: 20px;
         left: 15%;
         position: relative;
-
-
     }
 
     .ustooltip,
@@ -316,10 +325,9 @@
     }
 
     .gridlines line {
-        stroke: #d0cccc;
-        z-index: 10;
+        stroke: grey;
+        stroke-width: 0.5px;
     }
-
 
     .gridlines .domain {
         stroke: none;
@@ -328,13 +336,19 @@
 
     .background {
         z-index: 1;
+        position: absolute;
     }
 
+    .gridlines line {
+        stroke: #d0cccc;
+        z-index: 10;
+        position: absolute;
+    }
 
     .lineChart {
         position: relative;
         top: 30px;
-        right: 35%;
+        right: 15%;
     }
 
     #colorLegend {
@@ -364,6 +378,12 @@
         left: 20%;
         position: absolute;
     }
+
+
+    /* Adjust the bottom-left container to be tall enough */
+
+
+    /* Adjust the button to fit within the container */
 </style>
 
 <body>
@@ -412,6 +432,7 @@
 
     <script>
 
+
         const buttonLabels = {
             0: "Health Spending \u{1F4B0}",
             1: "COVID-19 Deaths \u{2620} ",
@@ -423,6 +444,7 @@
             2: "covid-cases"
         }
 
+
         const stateButtonLabels = {
             0: "Total Cases \u{26A0}",
             1: "Total Deaths  \u{2620}",
@@ -432,11 +454,13 @@
             1: "county-deaths"
         };
 
+
         const lineButtonLabels = {
             0: "Health Spending \u{1F4B0}",
             1: "COVID-19 Deaths \u{2620} ",
             2: "COVID-19 Cases  \u{26A0} "
         };
+
 
         const lineButtonClasses = {
             0: "health-spending",
@@ -455,6 +479,7 @@
         const usmap = svg1.append("g")
             .attr("transform", "translate(" + margins1.left + "," + margins1.top + ")");
 
+
         // VISUALIZATION 2 - covid cases by county
         const svg2 = d3.select('svg#statemap');
         const width2 = svg2.attr('width');
@@ -466,6 +491,7 @@
             .attr("transform", "translate(" + margins2.left + "," + margins2.top + ")");
         let currentStateToggle = 0; // show mask usage data initially
 
+
         // VISUALIZATION 3 - line graph
         const svg3 = d3.select('svg#chart');
         const width3 = svg3.attr('width');
@@ -473,30 +499,28 @@
         const margins3 = { top: 35, right: 75, bottom: 50, left: 80 };
         const chartWidth = width3 - margins3.left - margins3.right;
         const chartHeight = height3 - margins3.top - margins3.bottom;
+        // chart background color
+        svg3.append('rect')
+            .attr("x", margins3.left - 10)
+            .attr("y", margins3.top - 10)
+            .attr("width", chartWidth + 20)
+            .attr("height", chartHeight + 20)
+            .style("fill", "#FEE5D9")
+            .style("stroke", "black");
+
+        // gridlines & chart itself
         let annotations = svg3.append("g").attr("id", "annotations");
         let chartArea = svg3.append('g')
             .attr('transform', `translate(${margins3.left},${margins3.top})`);
 
 
 
-        const background = chartArea.append("g")
-            .attr("class", "background");
-
-
-        background.append('rect')
-            .attr("x", -10)
-            .attr("y", -10)
-            .attr("width", chartWidth + 20)
-            .attr("height", chartHeight + 20)
-            .style("fill", "#FEE5D9")
-            //.style("fill", "none")
-            .style("stroke", "black")
-            .lower();
 
         const requestData = async function () {
             // import topoJSON for US map
             const us = await d3.json("us-counties.json");
             console.log(us);
+
 
             // VISUALIZATION 1
             // draw US map
@@ -504,6 +528,7 @@
             var statesMesh = topojson.mesh(us, us.objects.states);
             var projection1 = d3.geoAlbersUsa().fitSize([mapWidth1, mapHeight1], states);
             var path1 = d3.geoPath().projection(projection1);
+
 
             // state paths
             let statePaths = usmap.selectAll("path.state").data(states.features)
@@ -517,9 +542,11 @@
                     updateStateMap(d);
                 });
 
+
             usmap.append("path").datum(statesMesh)
                 .attr("class", "outline")
                 .attr("d", path1);
+
 
             // import health spending data
             const healthSpendingData = await d3.csv("health_spending_data.csv");
@@ -529,6 +556,7 @@
                 d[hsc] = Number(d[hsc]);
             })
 
+
             // health data
             var healthSpendingDict = {};
             healthSpendingData.forEach(d => {
@@ -536,16 +564,20 @@
                 healthSpendingDict[d.Location] = { total: spending };
             });
 
+
             // import population data
             const popData = await d3.csv("us_pop_by_state.csv", d3.autoType);
 
+
             // import COVID data
             const covidData = await d3.csv("us-counties-2020.csv", d3.autoType);
+
 
             // extract cumulative data from last day of 2020
             const latestCovidData = covidData.filter(d => {
                 return d.date.toString().includes("Dec") && d.date.toString().includes("30") && d.date.toString().includes("2020"); //fix this later to include DEC 31 if possible ~Abdul
             });
+
 
             // covid deaths data dictionary, by county
             var fipsDeathsDict = {};
@@ -554,12 +586,14 @@
                 if (d.fips == null) return;
                 const fips = d.fips.toString().padStart(5, '0');
 
+
                 if (fips in fipsDeathsDict) {
                     fipsDeathsDict[fips] += d.deaths;
                 } else {
                     fipsDeathsDict[fips] = d.deaths;
                 }
             });
+
 
             // covid cases data dictionary, by county
             var fipsCasesDict = {};
@@ -573,6 +607,7 @@
                 }
             });
 
+
             // covid deaths data - latestCovidData summed up for counties in each state
             var covidDeathsDict = {};
             latestCovidData.forEach(d => {
@@ -583,6 +618,7 @@
                 }
             });
 
+
             // *** covid deaths normalized to population size (in %)
             var percentDeathsDict = {};
             popData.forEach(d => {
@@ -590,6 +626,7 @@
                     percentDeathsDict[d.state] = { total: 100 * (covidDeathsDict[d.state].total / d['2020_census']) }
                 } else { }
             })
+
 
             // covid cases data - latestCovidData summed up for counties in each state
             var covidCasesDict = {};
@@ -601,6 +638,7 @@
                 }
             });
 
+
             // *** covid cases normalized to population size (in %)
             var percentCasesDict = {};
             popData.forEach(d => {
@@ -609,28 +647,36 @@
                 } else { }
             })
 
+
             console.log(percentDeathsDict);
             console.log(percentCasesDict);
+
 
             console.log(healthSpendingDict);
             console.log(covidDeathsDict);
             console.log(covidCasesDict);
+
 
             // array of possible data sets for the US (state-level data)
             //var usData = [healthSpendingDict, covidDeathsDict, covidCasesDict];
             var usData = [healthSpendingDict, percentDeathsDict, percentCasesDict];
 
 
+
+
             // Currency format for health spending, decimals for deaths & cases (plus converts to %)
             const formatValue = [d3.format("$,.0f"), (d => d3.format(".2f")(d) + "%"), (d => d3.format(".1f")(d) + "%")]
+
 
             function updateUsScale(usToggle) {
                 let stateDict = usData[usToggle];
                 console.log(stateDict);
 
+
                 const colorScale = d3.scaleQuantile()
                     .domain(Object.values(stateDict).map(d => d.total))
                     .range(d3.schemeRdPu[4]);
+
 
                 usmap.selectAll(".state")
                     .style("fill", d => {
@@ -644,9 +690,11 @@
                 drawLegend("#colorLegend", colorScale, formatValue[usToggle])
             }
 
+
             // initialize us map
             let currentUsToggle = 0; // show health spending data initially
             updateUsScale(currentUsToggle);
+
 
             // buttons for map of US toggle
             const usKeys = Object.keys(usData);
@@ -662,10 +710,13 @@
                         updateUsScale(d);
                     })
 
+
             })
+
 
             //init selected buttons
             d3.select("#button-bar button").classed("active", true);
+
 
             // US map Mouseover tooltip stuff
             let ustooltipWidth = 110;
@@ -676,9 +727,11 @@
                 .style("stroke-width", 3)
                 .attr("d", "");
 
+
             let ustooltip = usmap.append("g")
                 .attr("class", "ustooltip")
                 .attr("visibility", "hidden");
+
 
             ustooltip.append("rect")
                 .attr("fill", "white")
@@ -689,11 +742,13 @@
                 .attr("width", ustooltipWidth)
                 .attr("height", ustooltipHeight)
 
+
             let stateLabel = ustooltip.append("text")
                 .attr("text-anchor", "middle")
                 .attr("alignment-baseline", "hanging")
                 .attr("x", 0)
                 .attr("y", 2);
+
 
             let usDataLabel = ustooltip.append("text")
                 .attr("text-anchor", "middle")
@@ -701,23 +756,28 @@
                 .attr("x", 0)
                 .attr("y", 22);
 
+
             // mouseoverState function to show name of state and amount of money on mouseover
             function mouseoverState(event, d) {
                 ustooltip.style("visibility", "visible")
                 let state = d3.select(this);
                 state.style("stroke-width", "4px");
 
+
                 // state name & data label
                 let location = d3.pointer(event);
                 let name = state.datum().properties.name;
                 stateDict = usData[currentUsToggle];
 
+
                 let value = stateDict[name].total;
                 // show more sig figs than legend format
                 const formatValue = [d3.format("$,.0f"), (d => d3.format(".3f")(d) + "%"), (d => d3.format(".2f")(d) + "%")]
 
+
                 stateLabel.text(name);
                 usDataLabel.text(formatValue[currentUsToggle](value));
+
 
                 let bounds = path1.bounds(state.datum());
                 let x = (bounds[0][0] + bounds[1][0]) / 2.0;
@@ -727,19 +787,24 @@
                 usMouseoverMesh.datum(mo).attr("d", path1)
             }
 
+
             // get rid of label and reset state attributes
             function mouseoutState() {
                 ustooltip.style("visibility", "hidden");
                 let state = d3.select(this);
                 state.style("stroke-width", "1px");
 
+
                 usMouseoverMesh.attr("d", "");
             }
 
+
             // VISUALIZATION 2
+
 
             // array of possible data sets for an individual state (county-level data)
             var countyData = [fipsCasesDict, fipsDeathsDict];
+
 
             // Initialize with New York
             const nyState = states.features.find(d => d.properties.name === "New York")
@@ -748,14 +813,17 @@
                 updateCountyData(nyState, 0);
             }
 
+
             function updateCountyData(selectedState, countyToggle) {
                 const selectedDict = countyData[countyToggle];
+
 
                 // fix color scale to calculate using only the county data from the selectedState ***
                 const colorScale = d3.scaleQuantile()
                     .domain(Object.values(selectedDict))
                     //.range(["#fff5f0", "#fcbba1", "#fb6a4a", "#cb181d"]);
                     .range(["#fff5f0", "#fcbba1", "#fc9272", "#fb6a4a", "#cb181d"]);
+
 
                 statemap.selectAll(".county")
                     .style("fill", d => {
@@ -765,18 +833,23 @@
                         return dataValue ? colorScale(dataValue) : "#ccc";
                     });
 
+
                 const formatValue = countyToggle === 0
                     ? d3.format(",d")
                     : d3.format(",d");
 
+
                 drawLegend("#countyColorLegend", colorScale, formatValue, true);
             }
 
+
             // write updateState function to update map 2 with county-level COVID data for selected state
             function updateStateMap(selectedState) {
-                ///updateCountyData(selectedState, currentStateToggle); // initialize county data - causes errors 
+                ///updateCountyData(selectedState, currentStateToggle); // initialize county data - causes errors
+
 
                 // isolate counties for selected state
+
 
                 //unclear previous state
                 statemap.selectAll(".county").remove();
@@ -784,8 +857,10 @@
                 statemap.selectAll(".outline").remove();
                 d3.select("#button-bar-state").style("display", "none").selectAll("button").remove();
 
+
                 //adding button to new state
                 d3.select("#button-bar-state").style("display", "flex");
+
 
                 Object.keys(stateButtonLabels).forEach(i => {
                     d3.select("#button-bar-state")
@@ -800,21 +875,27 @@
                         });
                 });
 
+
                 d3.select("#button-bar-state button").classed("active", true);
+
+
 
 
                 let selectedCounties = us.objects.counties.geometries.filter(function (d) { return selectedState.id == Math.floor(d.id / 1000) });
                 var counties = topojson.feature(us, { type: "GeometryCollection", geometries: selectedCounties });
                 var countiesMesh = topojson.mesh(us, { type: "GeometryCollection", geometries: selectedCounties });
 
+
                 // create projection & path for selected state
                 var stateProjection = d3.geoAlbersUsa().fitSize([mapWidth2, mapHeight2], selectedState);
                 var statePath = d3.geoPath().projection(stateProjection);
+
 
                 // Draw individual state outline
                 statemap.append("path").datum(selectedState)
                     .attr("class", "outline")
                     .attr("d", statePath);
+
 
                 // Draw counties within the selected state
                 statemap.selectAll("path.county").data(counties.features)
@@ -824,10 +905,12 @@
                     .on('mouseover', mouseoverCounty)
                     .on('mouseout', mouseoutCounty);
 
+
                 statemap.append("path").datum(countiesMesh)
                     .attr("class", "county-outline")
                     .attr("d", statePath);
                 updateCountyData(selectedState, 0);
+
 
                 // State map Mouseover tooltip stuff
                 let statetooltipWidth = 160;
@@ -838,9 +921,11 @@
                     .style("stroke-width", 3)
                     .attr("d", "");
 
+
                 let statetooltip = statemap.append("g")
                     .attr("class", "statetooltip")
                     .attr("visibility", "hidden");
+
 
                 statetooltip.append("rect")
                     .attr("fill", "white")
@@ -851,11 +936,13 @@
                     .attr("width", statetooltipWidth)
                     .attr("height", statetooltipHeight)
 
+
                 let countyLabel = statetooltip.append("text")
                     .attr("text-anchor", "middle")
                     .attr("alignment-baseline", "hanging")
                     .attr("x", 0)
                     .attr("y", 2);
+
 
                 let stateDataLabel = statetooltip.append("text")
                     .attr("text-anchor", "middle")
@@ -863,14 +950,18 @@
                     .attr("x", 0)
                     .attr("y", 22);
 
+
                 console.log(fipsCasesDict);
+
 
                 // mouseoverCounty function to show name of county and data value
                 function mouseoverCounty(event, d) {
                     statetooltip.style("visibility", "visible")
 
+
                     let county = d3.select(this);
                     county.style("stroke-width", "2px");
+
 
                     // make label appear with name of county & value of data
                     let location = d3.pointer(event);
@@ -879,8 +970,10 @@
                     let countyDict = (currentStateToggle === 0) ? fipsCasesDict : fipsDeathsDict;
                     let value = countyDict[fips];
 
+
                     countyLabel.text(name);
                     stateDataLabel.text(value !== undefined ? value : "(No Data)");
+
 
                     let bounds = statePath.bounds(county.datum());
                     let x = (bounds[0][0] + bounds[1][0]) / 2.0;
@@ -889,6 +982,7 @@
                     var mo = topojson.mesh(us, { type: "GeometryCollection", geometries: selectedCounties }, function (a, b) { return a.id === name || b.id === name; });
                     stateMouseoverMesh.datum(mo).attr("d", statePath)
                 }
+
 
                 // clear mouseovers
                 function mouseoutCounty() {
@@ -899,13 +993,16 @@
                 }
             }
 
+
             // VISUALIZATION 3
             // for reference: usData = [healthSpendingDict, covidDeathsDict, covidCasesDict];
+
 
             // line graph tooltip
             let charttooltip = chartArea.append("g")
                 .attr("class", "charttooltip")
                 .attr("visibility", "hidden");
+
 
             charttooltip.append("rect")
                 .attr("fill", "white")
@@ -916,16 +1013,19 @@
                 .attr("width", 110)
                 .attr("height", 40)
 
+
             let circleLabel = charttooltip.append("text")
                 .attr("text-anchor", "middle")
                 .attr("alignment-baseline", "hanging")
                 .attr("x", 0)
                 .attr("y", 0);
 
+
             // generate line graph based on button selections
             function updateLineGraph(xAxisToggle, yAxisToggle) {
                 console.log(usData[xAxisToggle])
                 console.log(usData[xAxisToggle][0])
+
 
                 chartArea.selectAll('circle').remove();
                 annotations.selectAll('.x.axis').remove();
@@ -934,25 +1034,30 @@
                 annotations.selectAll('.y.gridlines').remove();
                 svg3.selectAll('text').remove();
 
+
                 const xExtent = d3.extent(Object.values(usData[xAxisToggle]), d => d.total);
                 const xScale = d3.scaleLinear().domain(xExtent)
                     .range([0, chartWidth]);
 
+
                 const yExtent = d3.extent(Object.values(usData[yAxisToggle]), d => d.total);
                 const yScale = d3.scaleLinear().domain(yExtent)
                     .range([chartHeight, 0]);
+
 
                 // axes
                 let labels = ["Health Spending (per Capita)",
                     "COVID-19 Deaths in 2020 (% of State Population)",
                     "COVID-19 Cases in 2020 (% of State Population)"];
 
+
                 const formatValue = [d3.format("$,.0f"), (d => d3.format(".2f")(d) + "%"), (d => d3.format(".1f")(d) + "%")]
 
-                // y axis 
+
+                // y axis
                 let leftAxis = d3.axisLeft(yScale).tickFormat(formatValue[yAxisToggle]);
                 let leftGridlines = d3.axisLeft(yScale)
-                    .tickSize(-chartWidth - 10)
+                    .tickSize(-chartWidth - 20)
                     .tickFormat("");
                 annotations.append("g")
                     .attr("class", "y axis")
@@ -969,10 +1074,11 @@
                     .style("font-size", "15px")
                     .attr("transform", "rotate(-90)");
 
+
                 // x axis
                 let bottomAxis = d3.axisBottom(xScale).tickFormat(formatValue[xAxisToggle]);
                 let bottomGridlines = d3.axisBottom(xScale)
-                    .tickSize(-chartHeight - 10)
+                    .tickSize(-chartHeight - 20)
                     .tickFormat("");
                 annotations.append("g")
                     .attr("class", "x axis")
@@ -983,6 +1089,7 @@
                     .attr("transform", `translate(${margins3.left},${chartHeight + margins3.top + 10})`)
                     .call(bottomGridlines);
 
+
                 // x axis label
                 svg3.append("text").text(labels[xAxisToggle])
                     .attr("x", chartWidth / 2 + margins3.left)
@@ -990,6 +1097,7 @@
                     .style("font-size", "15px")
                     .attr("dominant-baseline", "middle")
                     .attr("text-anchor", "middle");
+
 
                 // plotting data
                 Object.keys(usData[xAxisToggle]).forEach((d, i) => {
@@ -999,6 +1107,7 @@
                     let x = undefined;
                     let y = undefined;
 
+
                     if (usData[xAxisToggle][stateName] && usData[yAxisToggle][stateName]) {
                         x = usData[xAxisToggle][stateName].total;
                         y = usData[yAxisToggle][stateName].total;
@@ -1006,11 +1115,14 @@
                         return;
                     }
 
+
                     console.log(x, y)
+
 
                     var label = svg3.append("text")
                         .attr("id", "label")
                         .attr("font-size", 15);
+
 
                     chartArea.append('circle')
                         .attr('cx', xScale(x))
@@ -1027,11 +1139,13 @@
                                 .attr("r", 8)
                                 .raise();
 
+
                             let textx = xScale(x) + margins3.left + 5;
                             let texty = yScale(y) + margins3.top + -10;
                             console.log(textx, texty);
                             console.log(stateName);
                             label.attr("x", textx - 10).attr("y", texty).text(stateName);
+
 
                         })
                         .on("mouseout", function () {
@@ -1043,10 +1157,13 @@
                 });
             }
 
+
             // initialize toggles - default to covid deaths vs health spending
             let xAxisToggle = 1;
             let yAxisToggle = 0;
             updateLineGraph(xAxisToggle, yAxisToggle);
+
+
 
 
             // x-axis toggle
@@ -1063,13 +1180,19 @@
                         updateLineGraph(xAxisToggle, yAxisToggle);
 
 
+
+
                         d3.selectAll("div#line-button button")
                             .classed("active", false);
+
+
 
 
                         d3.select(this).classed("active", true);
                     })
             });
+
+
 
 
             // y-axis toggle
@@ -1085,6 +1208,8 @@
                             .classed("active", false);
 
 
+
+
                         d3.select(this).classed("active", true);
                     })
             });
@@ -1092,7 +1217,9 @@
         }
         requestData();
 
+
     </script>
+
 
     <script>
         // Flexible legend-drawing function - Jeff Rzeszotarski, 2022
@@ -1101,8 +1228,11 @@
             d3.select(legendSelector).selectAll("*").remove(); //need this to prevent overlap
 
 
+
+
             // This code should adapt to a variety of different kinds of color scales
             //  Credit Prof. Rz if you are basing a legend on this structure, and note PERFORMANCE CONSIDERATIONS
+
 
             // Shrink legend bar by 5 px inwards from sides of SVG
             const offsets = {
@@ -1117,6 +1247,8 @@
             const minMaxExtendPercent = 0;
 
 
+
+
             const legend = d3.select(legendSelector);
             const legendHeight = legend.attr("height");
             const legendBarWidth = legend.attr("width") - (offsets.width * 2);
@@ -1125,20 +1257,25 @@
             const minMaxExtension = (legendMinMax[1] - legendMinMax[0]) * minMaxExtendPercent;
             const barHeight = legendHeight - offsets.top - offsets.bottom;
 
+
             // In this case the "data" are pixels, and we get numbers to use in colorScale
             // Use this to make axis labels
             let barScale = d3.scaleLinear().domain([legendMinMax[0] - minMaxExtension,
             legendMinMax[1] + minMaxExtension])
                 .range([0, legendBarWidth]);
 
+
             let barAxis = d3.axisBottom(barScale).tickFormat(formatValue);
+
 
             // Place for bar slices to live
             let bar = legend.append("g")
                 .attr("class", "legend colorbar")
                 .attr("transform", `translate(${offsets.width},${offsets.top})`)
 
+
             // ****** SWITCHES FOR DIFFERENT SCALE TYPES ******
+
 
             // Check if we're using a binning scale - if so, we make blocks of color
             if (legendColorScale.hasOwnProperty('thresholds') || legendColorScale.hasOwnProperty('quantiles')) {
@@ -1147,10 +1284,13 @@
                 if (legendColorScale.hasOwnProperty('thresholds')) { thresholds = legendColorScale.thresholds() }
                 else { thresholds = legendColorScale.quantiles() }
 
+
                 const barThresholds = [legendMinMax[0], ...thresholds, legendMinMax[1]];
+
 
                 // Use the quantile breakpoints plus the min and max of the scale as tick values
                 barAxis.tickValues(barThresholds);
+
 
                 // Draw rectangles between the threshold segments
                 for (let i = 0; i < barThresholds.length - 1; i++) {
@@ -1158,6 +1298,7 @@
                     let dataEnd = barThresholds[i + 1];
                     let pixelStart = barAxis.scale()(dataStart);
                     let pixelEnd = barAxis.scale()(dataEnd);
+
 
                     bar.append("rect")
                         .attr("x", pixelStart)
@@ -1181,10 +1322,13 @@
                 // It's likely that scale clamping will actually do this for us elegantly
                 // ...but better to be safer and patch the regions anyways
 
+
                 for (let i = 0; i < legendBarWidth; i = i + stepSize) {
+
 
                     let center = i + (stepSize / 2);
                     let dataCenter = barAxis.scale().invert(center);
+
 
                     // below normal scale bounds
                     if (dataCenter < legendMinMax[0]) {
@@ -1214,17 +1358,20 @@
                             .style("fill", legendColorScale(legendMinMax[1]));
                     }
 
+
                 }
             }
             // Otherwise we have a nominal scale
             else {
                 let nomVals = legendColorScale.domain().sort();
 
+
                 // Use a scaleBand to make blocks of color and simple labels
                 let barScale = d3.scaleBand().domain(nomVals)
                     .range([0, legendBarWidth])
                     .padding(0.05);
                 barAxis.scale(barScale);
+
 
                 // Draw rectangles for each nominal entry
                 nomVals.forEach(d => {
@@ -1238,15 +1385,16 @@
             }
             // DONE w/SWITCH
 
+
             // Finally, draw legend labels
             legend.append("g")
                 .attr("class", "legend axis")
                 .attr("transform", `translate(${offsets.width},${offsets.top + barHeight + 5})`)
                 .call(barAxis);
 
+
         }
     </script>
-
 
 </body>
 
