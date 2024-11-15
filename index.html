@@ -33,6 +33,8 @@
         display: flex;
         justify-content: center;
         align-items: center;
+        position: relative;
+        /* width: 100%; */
     }
 
     .bottom-container {
@@ -64,7 +66,7 @@
         position: absolute;
         top: 100px;
         transform: translate(250px, 980px);
-    } 
+    }
 
     .bottom-right {
         flex: 1;
@@ -85,7 +87,7 @@
         font-family: serif;
         position: absolute;
         top: 5%;
-        left: 3%;
+        left: 27%;
         font-size: 40px;
     }
 
@@ -137,10 +139,10 @@
         align-items: flex-start;
         gap: 10px;
         padding: 20px;
-        left: 7%;
-        position: relative;
+        left: 10%;
+        position: absolute;
     }
- 
+
     #line-button,
     #line-button2 {
         position: relative;
@@ -315,11 +317,19 @@
 
     .gridlines line {
         stroke: #d0cccc;
+        z-index: 10;
     }
+
 
     .gridlines .domain {
         stroke: none;
     }
+
+
+    .background {
+        z-index: 1;
+    }
+
 
     .lineChart {
         position: relative;
@@ -330,36 +340,45 @@
     #colorLegend {
         position: relative;
         /* top: 30px; */
-        right: 10%;
+        left: 18%;
     }
 
     #textbox {
-        border: 2px solid green;
-        background-color: white;
-        height: 230px;
+        /* 
         position: absolute;
+        left: 69%; */
+        position: relative;
+        /* top: 30px; */
+        left: 45%;
+        border: 2px solid black;
+        background-color: white;
+        height: 290px;
         font-size: 19px;
-        width: 25%;
-        left: 69%;
-        /* position: relative;
-        top: 3%;*/
-    }
- 
+        width: 19%;
+        padding: 10px;
 
+    }
+
+    #usmap {
+        top: 15%;
+        left: 20%;
+        position: absolute;
+    }
 </style>
 
 <body>
     <div class="container">
         <div class="top-box">
-            <div class="main-title">Title</div>
+            <div class="main-title">COVID-19 Trends Across the U.S. in 2020</div>
             <div id="button-bar"></div>
             <div id="textbox"> This interactive visualization is meant to illustrate the relationship between health
                 spending and covid-19 deaths across the United States from 2020. Hover over each state to see the exact
-                health spending per capita or number of COVID-19 deaths in 2020 in that state. Clicking on a state will
+                health spending per capita or COVID-19 deaths/ cases in 2020 as a percentage of that state's population.
+                Clicking on a state will
                 reveal county level data, displaying mask usage and county level deaths in the state map below.
-            </div> 
+            </div>
             <!-- <div id="button-bar-state" style="display: none;"></div> -->
-            <svg class="main-map" id="usmap" height="500" width="900" style="margin: auto 5px;
+            <svg id="usmap" height="500" width="900" style="margin: auto 5px;
            float: left; "></svg>
             <!-- <div class="usmap-description">Box holder</div> -->
             <svg class="colorLegend" id="colorLegend" height="100" width="440"
@@ -373,7 +392,7 @@
         <div class="bottom-container">
             <div class="bottom-left">
                 <div id="button-bar-state"></div>
-                <svg id="statemap" height="600" width="500"></svg>
+                <svg id="statemap" height="450" width="500"></svg>
                 <svg class="countyColorLegend" id="countyColorLegend" height="100" width="400"></svg>
 
             </div>
@@ -457,6 +476,22 @@
         let annotations = svg3.append("g").attr("id", "annotations");
         let chartArea = svg3.append('g')
             .attr('transform', `translate(${margins3.left},${margins3.top})`);
+
+
+
+        const background = chartArea.append("g")
+            .attr("class", "background");
+
+
+        background.append('rect')
+            .attr("x", -10)
+            .attr("y", -10)
+            .attr("width", chartWidth + 20)
+            .attr("height", chartHeight + 20)
+            .style("fill", "#FEE5D9")
+            //.style("fill", "none")
+            .style("stroke", "black")
+            .lower();
 
         const requestData = async function () {
             // import topoJSON for US map
@@ -552,7 +587,7 @@
             var percentDeathsDict = {};
             popData.forEach(d => {
                 if (d.state in covidDeathsDict) {
-                    percentDeathsDict[d.state] = { total: 100*(covidDeathsDict[d.state].total / d['2020_census']) }
+                    percentDeathsDict[d.state] = { total: 100 * (covidDeathsDict[d.state].total / d['2020_census']) }
                 } else { }
             })
 
@@ -570,7 +605,7 @@
             var percentCasesDict = {};
             popData.forEach(d => {
                 if (d.state in covidCasesDict) {
-                    percentCasesDict[d.state] = { total: 100*(covidCasesDict[d.state].total / d['2020_census']) }
+                    percentCasesDict[d.state] = { total: 100 * (covidCasesDict[d.state].total / d['2020_census']) }
                 } else { }
             })
 
@@ -585,7 +620,7 @@
             //var usData = [healthSpendingDict, covidDeathsDict, covidCasesDict];
             var usData = [healthSpendingDict, percentDeathsDict, percentCasesDict];
 
-            
+
             // Currency format for health spending, decimals for deaths & cases (plus converts to %)
             const formatValue = [d3.format("$,.0f"), (d => d3.format(".2f")(d) + "%"), (d => d3.format(".1f")(d) + "%")]
 
@@ -680,7 +715,7 @@
                 let value = stateDict[name].total;
                 // show more sig figs than legend format
                 const formatValue = [d3.format("$,.0f"), (d => d3.format(".3f")(d) + "%"), (d => d3.format(".2f")(d) + "%")]
-                
+
                 stateLabel.text(name);
                 usDataLabel.text(formatValue[currentUsToggle](value));
 
@@ -909,8 +944,8 @@
 
                 // axes
                 let labels = ["Health Spending (per Capita)",
-                    "Cumulative COVID-19 Deaths in 2020",
-                    "Cumulative COVID-19 Cases in 2020"];
+                    "COVID-19 Deaths in 2020 (% of State Population)",
+                    "COVID-19 Cases in 2020 (% of State Population)"];
 
                 const formatValue = [d3.format("$,.0f"), (d => d3.format(".2f")(d) + "%"), (d => d3.format(".1f")(d) + "%")]
 
@@ -988,7 +1023,7 @@
                         // on mouseover change color & size, show name of state
                         .on("mouseover", function () {
                             d3.select(this).attr("fill", "#4d759a")
-                                .attr("stroke","#073763")
+                                .attr("stroke", "#073763")
                                 .attr("r", 8)
                                 .raise();
 
@@ -1013,6 +1048,7 @@
             let yAxisToggle = 0;
             updateLineGraph(xAxisToggle, yAxisToggle);
 
+
             // x-axis toggle
             const lineKeys = Object.keys(usData);
             Object.keys(lineButtonLabels).forEach(d => {
@@ -1021,12 +1057,15 @@
                     .append("button")
                     .attr("class", lineButtonClasses[d])
                     .text(lineButtonLabels[d])
+                    .classed("active", d == xAxisToggle)
                     .on("click", function () {
                         xAxisToggle = Number(d);
                         updateLineGraph(xAxisToggle, yAxisToggle);
 
+
                         d3.selectAll("div#line-button button")
                             .classed("active", false);
+
 
                         d3.select(this).classed("active", true);
                     })
@@ -1045,13 +1084,14 @@
                         d3.selectAll("div#line-button2 button")
                             .classed("active", false);
 
+
                         d3.select(this).classed("active", true);
                     })
             });
-
-
+            d3.select("#line-button2 button").classed("active", true);
         }
         requestData();
+
     </script>
 
     <script>
