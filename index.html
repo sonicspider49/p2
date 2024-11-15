@@ -62,9 +62,9 @@
 
     #countyColorLegend {
         position: absolute;
-        transform: translate(250px, 280px);
-    }
-
+        top: 100px;
+        transform: translate(250px, 980px);
+    } 
 
     .bottom-right {
         flex: 1;
@@ -129,11 +129,18 @@
     #line-button2 button {
         width: 175px;
         height: 50px;
-
     }
 
-
-
+    #button-bar {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 20px;
+        left: 7%;
+        position: relative;
+    }
+ 
     #line-button,
     #line-button2 {
         position: relative;
@@ -142,11 +149,7 @@
         transform: translateX(-50%);
         /* margin-top: 80%; */
         /* position: relative; */
-
     }
-
-
-
 
     #button-bar button.health-spending,
     #line-button button.health-spending,
@@ -168,10 +171,6 @@
         display: block
     }
 
-
-
-
-
     #button-bar button.health-spending:hover,
     #button-bar button.health-spending.active,
     #line-button button.health-spending:hover,
@@ -181,8 +180,6 @@
         background-color: #11bc4a;
         color: white;
     }
-
-
 
     #button-bar button.covid-deaths,
     #line-button button.covid-deaths,
@@ -205,8 +202,6 @@
         display: block
     }
 
-
-
     #button-bar button.covid-deaths:hover,
     #button-bar button.covid-deaths.active,
     #line-button button.covid-deaths:hover,
@@ -216,7 +211,6 @@
         background-color: #ba1a5a;
         color: white;
     }
-
 
     #button-bar button.covid-cases,
     #line-button button.covid-cases,
@@ -246,7 +240,6 @@
         background-color: #4B7EF5;
         color: white;
     }
-
 
     #button-bar-state button.county-cases {
         padding: 10px 20px;
@@ -320,7 +313,6 @@
         pointer-events: none;
     }
 
-
     .gridlines line {
         stroke: #d0cccc;
     }
@@ -333,8 +325,27 @@
         position: relative;
         top: 30px;
         right: 35%;
-
     }
+
+    #colorLegend {
+        position: relative;
+        /* top: 30px; */
+        right: 10%;
+    }
+
+    #textbox {
+        border: 2px solid green;
+        background-color: white;
+        height: 230px;
+        position: absolute;
+        font-size: 19px;
+        width: 25%;
+        left: 69%;
+        /* position: relative;
+        top: 3%;*/
+    }
+ 
+
 </style>
 
 <body>
@@ -342,11 +353,16 @@
         <div class="top-box">
             <div class="main-title">Title</div>
             <div id="button-bar"></div>
+            <div id="textbox"> This interactive visualization is meant to illustrate the relationship between health
+                spending and covid-19 deaths across the United States from 2020. Hover over each state to see the exact
+                health spending per capita or number of COVID-19 deaths in 2020 in that state. Clicking on a state will
+                reveal county level data, displaying mask usage and county level deaths in the state map below.
+            </div> 
             <!-- <div id="button-bar-state" style="display: none;"></div> -->
             <svg class="main-map" id="usmap" height="500" width="900" style="margin: auto 5px;
            float: left; "></svg>
             <!-- <div class="usmap-description">Box holder</div> -->
-            <svg class="colorLegend" id="colorLegend" height="100" width="420"
+            <svg class="colorLegend" id="colorLegend" height="100" width="440"
                 style="margin-top: 30%; margin-left: 1%;"></svg>
 
 
@@ -536,8 +552,7 @@
             var percentDeathsDict = {};
             popData.forEach(d => {
                 if (d.state in covidDeathsDict) {
-                    // multiply by another 100 and say data unit is x10^2 ? 
-                    percentDeathsDict[d.state] = { total: 100 * 100 * (covidDeathsDict[d.state].total / d['2020_census']) }
+                    percentDeathsDict[d.state] = { total: 100*(covidDeathsDict[d.state].total / d['2020_census']) }
                 } else { }
             })
 
@@ -555,7 +570,7 @@
             var percentCasesDict = {};
             popData.forEach(d => {
                 if (d.state in covidCasesDict) {
-                    percentCasesDict[d.state] = { total: 100 * (covidCasesDict[d.state].total / d['2020_census']) }
+                    percentCasesDict[d.state] = { total: 100*(covidCasesDict[d.state].total / d['2020_census']) }
                 } else { }
             })
 
@@ -567,24 +582,20 @@
             console.log(covidCasesDict);
 
             // array of possible data sets for the US (state-level data)
-            var usData = [healthSpendingDict, covidDeathsDict, covidCasesDict];
-            //***var usData = [healthSpendingDict, percentDeathsDict, percentCasesDict];
+            //var usData = [healthSpendingDict, covidDeathsDict, covidCasesDict];
+            var usData = [healthSpendingDict, percentDeathsDict, percentCasesDict];
 
+            
+            // Currency format for health spending, decimals for deaths & cases (plus converts to %)
+            const formatValue = [d3.format("$,.0f"), (d => d3.format(".2f")(d) + "%"), (d => d3.format(".1f")(d) + "%")]
 
             function updateUsScale(usToggle) {
-
-                const formatValue = usToggle == 0
-                    ? d3.format("$,.0f")  // Currency format for health spending
-                    : d3.format(",d");    // Comma-separated integers for deaths/ cases
-
                 let stateDict = usData[usToggle];
                 console.log(stateDict);
 
                 const colorScale = d3.scaleQuantile()
                     .domain(Object.values(stateDict).map(d => d.total))
-                    // can just do 4 bins to reduce legend overlap
-                    //.range(["#fff", "#adc2da", "#8879b3", "#762b80"]); 
-                    .range(["#fff", "#d1e8ed", "#adc2da", "#8879b3", "#762b80"]);
+                    .range(d3.schemeRdPu[4]);
 
                 usmap.selectAll(".state")
                     .style("fill", d => {
@@ -595,7 +606,7 @@
                             return "#ccc";
                         }
                     });
-                drawLegend("#colorLegend", colorScale, formatValue)
+                drawLegend("#colorLegend", colorScale, formatValue[usToggle])
             }
 
             // initialize us map
@@ -666,19 +677,12 @@
                 let name = state.datum().properties.name;
                 stateDict = usData[currentUsToggle];
 
-                //if (currentUsToggle === 1) {
-                //    stateDict = covidDeathsDict;
-                //} else if (currentUsToggle === 2) {
-                //    stateDict = covidCasesDict;
-                //} else {
-                //    stateDict = healthSpendingDict;
-                //} 
-
                 let value = stateDict[name].total;
-
-                var dollarform = d3.format("$,.0f")
+                // show more sig figs than legend format
+                const formatValue = [d3.format("$,.0f"), (d => d3.format(".3f")(d) + "%"), (d => d3.format(".2f")(d) + "%")]
+                
                 stateLabel.text(name);
-                usDataLabel.text((currentUsToggle === 0) ? dollarform(value) : d3.format(",d")(value));
+                usDataLabel.text(formatValue[currentUsToggle](value));
 
                 let bounds = path1.bounds(state.datum());
                 let x = (bounds[0][0] + bounds[1][0]) / 2.0;
@@ -858,15 +862,10 @@
                     county.style("stroke-width", "1px");
                     stateMouseoverMesh.attr("d", "");
                 }
-
             }
 
-            // initialize state map - cant figure out
-            //let stateToggle = 0; // show mask usage data initially
-            //updateStateMap(currentStateToggle);
-
             // VISUALIZATION 3
-            //var usData = [healthSpendingDict, covidDeathsDict, covidCasesDict];
+            // for reference: usData = [healthSpendingDict, covidDeathsDict, covidCasesDict];
 
             // line graph tooltip
             let charttooltip = chartArea.append("g")
@@ -909,12 +908,14 @@
                     .range([chartHeight, 0]);
 
                 // axes
-                let labels = ["Health Spending ($ per Capita)",
+                let labels = ["Health Spending (per Capita)",
                     "Cumulative COVID-19 Deaths in 2020",
                     "Cumulative COVID-19 Cases in 2020"];
 
+                const formatValue = [d3.format("$,.0f"), (d => d3.format(".2f")(d) + "%"), (d => d3.format(".1f")(d) + "%")]
+
                 // y axis 
-                let leftAxis = d3.axisLeft(yScale);
+                let leftAxis = d3.axisLeft(yScale).tickFormat(formatValue[yAxisToggle]);
                 let leftGridlines = d3.axisLeft(yScale)
                     .tickSize(-chartWidth - 10)
                     .tickFormat("");
@@ -934,7 +935,7 @@
                     .attr("transform", "rotate(-90)");
 
                 // x axis
-                let bottomAxis = d3.axisBottom(xScale);
+                let bottomAxis = d3.axisBottom(xScale).tickFormat(formatValue[xAxisToggle]);
                 let bottomGridlines = d3.axisBottom(xScale)
                     .tickSize(-chartHeight - 10)
                     .tickFormat("");
@@ -974,7 +975,7 @@
 
                     var label = svg3.append("text")
                         .attr("id", "label")
-                        .attr("font-size", 17);
+                        .attr("font-size", 15);
 
                     chartArea.append('circle')
                         .attr('cx', xScale(x))
@@ -986,7 +987,8 @@
                         .attr('stroke-width', 1)
                         // on mouseover change color & size, show name of state
                         .on("mouseover", function () {
-                            d3.select(this).attr("fill", "green")
+                            d3.select(this).attr("fill", "#4d759a")
+                                .attr("stroke","#073763")
                                 .attr("r", 8)
                                 .raise();
 
@@ -994,12 +996,13 @@
                             let texty = yScale(y) + margins3.top + -10;
                             console.log(textx, texty);
                             console.log(stateName);
-                            label.attr("x", textx).attr("y", texty).text(stateName);
+                            label.attr("x", textx - 10).attr("y", texty).text(stateName);
 
                         })
                         .on("mouseout", function () {
                             label.text("")
                             d3.select(this).attr("fill", "red")
+                                .attr('stroke', "darkred")
                                 .attr("r", 5);
                         });
                 });
@@ -1063,7 +1066,7 @@
 
             // Shrink legend bar by 5 px inwards from sides of SVG
             const offsets = {
-                width: 10,
+                width: 17,
                 top: 2,
                 bottom: 24
             };
