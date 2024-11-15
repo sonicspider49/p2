@@ -421,7 +421,7 @@
                 <div id="line-button2"></div>
                 <!-- <div id="line-button"></div> -->
 
-                <svg class="lineChart" id="chart" height="535" width="600"></svg>
+                <svg class="lineChart" id="chart" height="520" width="600"></svg>
                 <!-- <svg id="statemap" height="500" width="500" style="margin:20px"></svg> -->
                 <!-- <svg id="colorLegend" height="80" width="600" style="background: #fff; margin-top:30px"></svg> -->
             </div>
@@ -429,10 +429,7 @@
     </div>
 
 
-
     <script>
-
-
         const buttonLabels = {
             0: "Health Spending \u{1F4B0}",
             1: "COVID-19 Deaths \u{2620} ",
@@ -444,7 +441,6 @@
             2: "covid-cases"
         }
 
-
         const stateButtonLabels = {
             0: "Total Cases \u{26A0}",
             1: "Total Deaths  \u{2620}",
@@ -454,13 +450,11 @@
             1: "county-deaths"
         };
 
-
         const lineButtonLabels = {
             0: "Health Spending \u{1F4B0}",
             1: "COVID-19 Deaths \u{2620} ",
             2: "COVID-19 Cases  \u{26A0} "
         };
-
 
         const lineButtonClasses = {
             0: "health-spending",
@@ -496,7 +490,7 @@
         const svg3 = d3.select('svg#chart');
         const width3 = svg3.attr('width');
         const height3 = svg3.attr('height');
-        const margins3 = { top: 35, right: 75, bottom: 50, left: 80 };
+        const margins3 = { top: 35, right: 90, bottom: 50, left: 80 };
         const chartWidth = width3 - margins3.left - margins3.right;
         const chartHeight = height3 - margins3.top - margins3.bottom;
         // chart background color
