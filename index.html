@@ -1,4 +1,5 @@
 <html>
+
 <head>
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <script src="https://d3js.org/topojson.v3.min.js"></script>
@@ -146,7 +147,7 @@
     #line-button {
         position: relative;
         top: 67%;
-        left: 25%;
+        left: 11%;
         transform: translateX(-50%);
         /* margin-top: 80%; */
         /* position: relative; */
@@ -638,9 +639,9 @@
             var usData = [healthSpendingDict, percentDeathsDict, percentCasesDict];
 
             // Currency format for health spending, decimals for deaths & cases (plus converts to %)
-            const formatValue = [d3.format("$,.0f"), 
-                                (d => d3.format(".2f")(d) + "%"), 
-                                (d => d3.format(".1f")(d) + "%")]
+            const formatValue = [d3.format("$,.0f"),
+            (d => d3.format(".2f")(d) + "%"),
+            (d => d3.format(".1f")(d) + "%")]
 
             function updateUsScale(usToggle) {
                 let stateDict = usData[usToggle];
@@ -774,7 +775,7 @@
                     .filter(([fips, value]) => fipsToStateDict[fips] === selectedState.properties.name)
                     .map(([fips, value]) => value);
 
-                const minMax = d3.extent( stateCountyValues, d => d );
+                const minMax = d3.extent(stateCountyValues, d => d);
 
                 // choose color scale:
 
@@ -785,7 +786,7 @@
                 //const colorScale = d3.scaleQuantile().domain(stateCountyValues)
                 //                                     .range(["#fff5f0", "#fcbba1", "#fb6a4a", "#cb181d"]);
 
-                const colorScale = d3.scaleLog().domain(minMax).interpolate(d => d3.interpolate("#fff5f0","#cb181d"))
+                const colorScale = d3.scaleLog().domain(minMax).interpolate(d => d3.interpolate("#fff5f0", "#cb181d"))
 
                 // color counties based on data
                 statemap.selectAll(".county")
@@ -898,7 +899,7 @@
                     statetooltip.style("visibility", "visible")
 
                     let county = d3.select(this);
-                    county.style("stroke-width", "2px"); 
+                    county.style("stroke-width", "2px");
 
                     // make label appear with name of county & value of data
                     let location = d3.pointer(event);
@@ -978,8 +979,8 @@
 
                 // different format functions for each type of data
                 const formatValue = [(d => "$" + d3.format("~s")(d)),
-                                    (d => d3.format(".2f")(d) + "%"), 
-                                    (d => d3.format(".1f")(d) + "%")]
+                (d => d3.format(".2f")(d) + "%"),
+                (d => d3.format(".1f")(d) + "%")]
 
                 // y axis
                 let leftAxis = d3.axisLeft(yScale).tickFormat(formatValue[yAxisToggle]);
@@ -1151,8 +1152,8 @@
             // In this case the "data" are pixels, and we get numbers to use in colorScale
             // Use this to make axis labels
             let barScale = d3.scaleLinear().domain([legendMinMax[0] - minMaxExtension,
-                                                    legendMinMax[1] + minMaxExtension])
-                                            .range([0, legendBarWidth]);
+            legendMinMax[1] + minMaxExtension])
+                .range([0, legendBarWidth]);
 
             //let barAxis = d3.axisBottom(barScale).tickFormat(formatValue);
             let barAxis = d3.axisBottom(barScale).tickFormat(formatValue);
@@ -1170,25 +1171,25 @@
                 let thresholds = [];
                 if (legendColorScale.hasOwnProperty('thresholds')) { thresholds = legendColorScale.thresholds() }
                 else { thresholds = legendColorScale.quantiles() }
-                
+
                 const barThresholds = [legendMinMax[0], ...thresholds, legendMinMax[1]];
-                
+
                 // Use the quantile breakpoints plus the min and max of the scale as tick values
                 barAxis.tickValues(barThresholds);
-                
+
                 // Draw rectangles between the threshold segments
-                for (let i=0; i<barThresholds.length-1; i++) {
-                  let dataStart = barThresholds[i];
-                  let dataEnd = barThresholds[i+1];
-                  let pixelStart = barAxis.scale()(dataStart);
-                  let pixelEnd = barAxis.scale()(dataEnd);
-                  
-                  bar.append("rect")
-                     .attr("x", pixelStart)
-                     .attr("y", 0)
-                     .attr("width", pixelEnd - pixelStart )
-                     .attr("height", barHeight)
-                     .style("fill", legendColorScale( (dataStart + dataEnd) / 2.0 ) ); 
+                for (let i = 0; i < barThresholds.length - 1; i++) {
+                    let dataStart = barThresholds[i];
+                    let dataEnd = barThresholds[i + 1];
+                    let pixelStart = barAxis.scale()(dataStart);
+                    let pixelEnd = barAxis.scale()(dataEnd);
+
+                    bar.append("rect")
+                        .attr("x", pixelStart)
+                        .attr("y", 0)
+                        .attr("width", pixelEnd - pixelStart)
+                        .attr("height", barHeight)
+                        .style("fill", legendColorScale((dataStart + dataEnd) / 2.0));
                 }
             }
             // Else if we have a continuous / roundable scale
