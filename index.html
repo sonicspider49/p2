@@ -1028,6 +1028,8 @@
                 // plotting data
                 Object.keys(usData[xAxisToggle]).forEach((d, i) => {
                     let stateName = String(d);
+                    let x = undefined; // keep
+                    let y = undefined;
 
                     // check that state is in both datasets
                     if (usData[xAxisToggle][stateName] && usData[yAxisToggle][stateName]) {
