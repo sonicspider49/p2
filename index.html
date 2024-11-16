@@ -641,6 +641,16 @@
                 } else { }
             })
 
+            // *** dictionary where key is fip and value is state 
+            const fipsToStateDict = {};
+
+            latestCovidData.forEach(d => {
+                if (d.fips == null || d.state == null) return;
+                const fips = d.fips.toString().padStart(5, '0');
+                fipsToStateDict[fips] = d.state;
+            });
+
+
 
             console.log(percentDeathsDict);
             console.log(percentCasesDict);
@@ -812,10 +822,13 @@
                 const selectedDict = countyData[countyToggle];
 
 
+                const stateCountyValues = Object.entries(selectedDict)
+                    .filter(([fips, value]) => fipsToStateDict[fips] === selectedState.properties.name)
+                    .map(([fips, value]) => value);
+
                 // fix color scale to calculate using only the county data from the selectedState ***
                 const colorScale = d3.scaleQuantile()
-                    .domain(Object.values(selectedDict))
-                    //.range(["#fff5f0", "#fcbba1", "#fb6a4a", "#cb181d"]);
+                    .domain(stateCountyValues)
                     .range(["#fff5f0", "#fcbba1", "#fc9272", "#fb6a4a", "#cb181d"]);
 
 
@@ -903,6 +916,7 @@
                 statemap.append("path").datum(countiesMesh)
                     .attr("class", "county-outline")
                     .attr("d", statePath);
+
                 updateCountyData(selectedState, 0);
 
 
