@@ -780,13 +780,18 @@
                 // choose color scale:
 
                 // ["#fff5f0", "#fcbba1", "#fc9272", "#fb6a4a", "#cb181d"]
-                //const colorScale = d3.scaleQuantize().domain(minMax)
-                //    .range(["#fff5f0", "#fcbba1", "#fc9272", "#fb6a4a", "#cb181d"]);
+
+                // Do we want 3 or 4 buckets?
+                // const colorScale = d3.scaleQuantize().domain(minMax)
+                //     .range(["#fff5f0", "#fcbba1", "#fc9272", "#cb181d"]);
+                const colorScale = d3.scaleQuantize().domain(minMax)
+                    .range(["#fff5f0", "#fcbba1", "#cb181d"]);
+
 
                 //const colorScale = d3.scaleQuantile().domain(stateCountyValues)
                 //                                     .range(["#fff5f0", "#fcbba1", "#fb6a4a", "#cb181d"]);
 
-                const colorScale = d3.scaleLog().domain(minMax).interpolate(d => d3.interpolate("#fff5f0", "#cb181d"))
+                // const colorScale = d3.scaleLog().domain(minMax).interpolate(d => d3.interpolate("#fff5f0", "#cb181d"))
 
                 // color counties based on data
                 statemap.selectAll(".county")
@@ -798,7 +803,8 @@
                     });
 
                 // formatting to reduce crowded numbers
-                let formatValue = d3.format("~s");
+                // let formatValue = d3.format("~s");
+                let formatValue = d3.format(".3~s");
 
                 drawLegend("#countyColorLegend", colorScale, formatValue);
             }
