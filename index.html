@@ -66,7 +66,7 @@
     #countyColorLegend {
         position: absolute;
         top: 70%;
-        left: 37%;
+        left: 40%;
         /* top: 100px; */
         /* transform: translate(250px, 980px); */
     }
@@ -354,7 +354,7 @@
 
     .lineChart {
         position: relative;
-        top: 70px;
+        top: 80px;
         right: 27%;
     }
 
@@ -393,7 +393,7 @@
         border-radius: 4px;
         font-family: serif;
         position: absolute;
-        top: 6px;
+        top: 20px;
         left: 40%;
         font-size: 30px;
     }
@@ -406,7 +406,7 @@
         font-family: serif;
         position: absolute;
         top: 20px;
-        left: 5%;
+        left: 3%;
         font-size: 30px;
     }
 
@@ -432,13 +432,13 @@
         border-radius: 4px;
         font-family: serif;
         position: relative;
-        top: 55px;
-        left: -262px;
+        top: 85px;
+        left: -282px;
         font-size: 15px;
         border: 2px solid black;
         background-color: white;
         width: 280px;
-        height: 145px;
+        height: 100px;
 
     }
 
@@ -484,11 +484,11 @@
         <div class="top-box">
             <div class="main-title">COVID-19 Trends Across the U.S. in 2020</div>
             <div id="button-bar"></div>
-            <div id="textbox"> This interactive visualization is meant to illustrate the relationship between health
-                spending and covid-19 deaths across the United States from 2020. Hover over each state to see the exact
-                health spending per capita or COVID-19 deaths/ cases in 2020 as a percentage of that state's population.
-                Clicking on a state will
-                reveal county level data, displaying mask usage and county level deaths in the state map below.
+            <div id="textbox"> This interactive visualization is meant to illustrate the relationship between 
+                health spending and COVID-19 deaths and cases across the United States in 2020. Hover over each 
+                state to see the exact health spending per capita or COVID-19 deaths or cases in 2020 as a 
+                percentage of that state's population. Clicking on a state will reveal more insights, displaying 
+                county level deaths and cases in the state map below. 
             </div>
             <!-- <div id="button-bar-state" style="display: none;"></div> -->
             <svg id="usmap" height="500" width="900" style="margin: auto 5px;
@@ -503,9 +503,8 @@
                 <div id="button-bar-state"></div>
                 <div class="title2"> Comparison Across Counties</div>
                 <svg id="statemap" height="450" width="500"></svg>
-                <div id="textbox2">This graph compares health spending, COVID-19 cases, and COVID-19 deaths across all
-                    50 states. Click the buttons to set which variable is on which axis and hover over each data point
-                    to see which state is being represented. </div>
+                <div id="textbox2">Hover over each county in the state map below to see the exact number of COVID-19 
+                    cases or deaths in that county in 2020.  </div>
                 <svg class="countyColorLegend" id="countyColorLegend" height="100" width="400"></svg>
             </div>
             <div class="bottom-right">
@@ -752,9 +751,14 @@
                 let stateDict = usData[usToggle];
                 console.log(stateDict);
 
-                const colorScale = d3.scaleQuantile()
-                    .domain(Object.values(stateDict).map(d => d.total))
-                    .range(d3.schemeRdPu[4]);
+               //const colorScale = d3.scaleQuantile().domain(Object.values(stateDict).map(d => d.total))
+               //                                    .range(d3.schemeRdPu[4]);
+                  
+               const minMax = d3.extent(Object.values(stateDict).map(d => d.total), d => d);
+
+
+               const colorScale = d3.scaleQuantize().domain(minMax)
+                                                    .range(d3.schemeRdPu[5]);
 
                 usmap.selectAll(".state")
                     .style("fill", d => {
@@ -890,7 +894,7 @@
                 // const colorScale = d3.scaleQuantize().domain(minMax)
                 //     .range(["#fff5f0", "#fcbba1", "#fc9272", "#cb181d"]);
                 const colorScale = d3.scaleQuantize().domain(minMax)
-                    .range(["#fff5f0", "#fcbba1", "#cb181d"]);
+                    .range(["#fff5f0", "#fcbba1", "#fc9272", "#fb6a4a", "#cb181d"]);
 
 
                 //const colorScale = d3.scaleQuantile().domain(stateCountyValues)
@@ -1110,7 +1114,7 @@
                 // y axis label
                 svg3.append("text").text(labels[yAxisToggle])
                     .attr("x", -chartHeight + 70)
-                    .attr("y", 10)
+                    .attr("y", 13)
                     .style("font-size", "15px")
                     .attr("transform", "rotate(-90)");
 
