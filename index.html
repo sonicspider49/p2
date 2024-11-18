@@ -1164,14 +1164,15 @@
                         .attr('cx', xScale(x))
                         .attr('cy', yScale(y))
                         .attr('r', 5)
-                        .attr("fill", "red")
+                        .attr("fill", "#c51b7d")
                         .attr('opacity', 1)
-                        .attr('stroke', "darkred")
+                        .attr('stroke', "#67001f")
                         .attr('stroke-width', 1)
                         // on mouseover change color & size, show name of state
                         .on("mouseover", function () {
-                            d3.select(this).attr("fill", "#4d759a")
-                                .attr("stroke", "#073763")
+                            d3.select(this).attr("fill", "red")
+                                .attr("stroke", "darkred")
+                                .attr('stroke-width', 2)
                                 .attr("r", 8)
                                 .raise();
 
@@ -1184,8 +1185,9 @@
                         // get rid of changes made on mouseover
                         .on("mouseout", function () {
                             label.text("")
-                            d3.select(this).attr("fill", "red")
-                                .attr('stroke', "darkred")
+                            d3.select(this).attr("fill", "#c51b7d")
+                                .attr('stroke', "#67001f")
+                                .attr('stroke-width', 1)
                                 .attr("r", 5);
                         });
                 });
