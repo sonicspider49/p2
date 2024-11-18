@@ -944,7 +944,10 @@
                         });
                 });
 
-                d3.select("#button-bar-state button").classed("active", true);
+                d3.selectAll("#button-bar-state button")
+                    .classed("active", (d, i) => i === currentStateToggle);
+
+                updateCountyData(selectedState, currentStateToggle);
 
 
                 let selectedCounties = us.objects.counties.geometries.filter(function (d) { return selectedState.id == Math.floor(d.id / 1000) });
