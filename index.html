@@ -792,6 +792,7 @@
                         updateUsScale(d);
                     })
             })
+            d3.select("div#button-bar").raise() // make sure buttons aren't covered
 
             // init selected buttons
             d3.select("#button-bar button").classed("active", true);
