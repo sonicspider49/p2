@@ -50,7 +50,7 @@
     }
 
     .bottom-left {
-        flex: 1;
+        flex: 40;
         background-color: #E6ECF5;
         display: flex;
         justify-content: flex-start;
@@ -65,14 +65,14 @@
 
     #countyColorLegend {
         position: absolute;
-        top: 50%;
-        left: 27%;
+        top: 70%;
+        left: 37%;
         /* top: 100px; */
         /* transform: translate(250px, 980px); */
     }
 
     .bottom-right {
-        flex: 1;
+        flex: 60;
         background-color: #E6ECF5;
 
         /* position: relative; */
@@ -80,6 +80,8 @@
         justify-content: flex-start;
         /* align-items: center; */
         height: 100%;
+        position: relative;
+
     }
 
     .main-title {
@@ -112,14 +114,17 @@
         stroke-width: 2px;
     }
 
-    .statemap {
-        fill: white;
+    #statemap {
+        /* fill: white;
         position: absolute;
         gap: 8px;
         padding: 10px;
         border: none;
         border-radius: 4px;
-        top: 90%;
+        top: 90%; */
+        top: 23%;
+        left: 15%;
+        position: relative;
     }
 
     .county-outline {
@@ -142,14 +147,14 @@
         align-items: flex-start;
         gap: 10px;
         padding: 20px;
-        left: 10%;
+        left: 19%;
         position: absolute;
     }
 
     #line-button {
         position: relative;
-        top: 47%;
-        left: 11%;
+        top: 42%;
+        left: 10%;
         transform: translateX(-50%);
         /* margin-top: 80%; */
         /* position: relative; */
@@ -157,8 +162,8 @@
 
     #line-button2 {
         position: relative;
-        top: 17%;
-        left: -8%;
+        top: 72%;
+        left: -5%;
         transform: translateX(-50%);
         /* margin-top: 80%; */
         /* position: relative; */
@@ -315,8 +320,9 @@
         align-items: flex-start;
         gap: 10px;
         padding: 20px;
-        left: 30%;
+        left: 75%;
         position: relative;
+        top: 7%;
     }
 
     .ustooltip,
@@ -349,13 +355,13 @@
     .lineChart {
         position: relative;
         top: 70px;
-        right: 15%;
+        right: 27%;
     }
 
     #colorLegend {
         position: relative;
-        /* top: 30px; */
-        left: 18%;
+        top: -22px;
+        left: 12%;
     }
 
     #textbox {
@@ -364,7 +370,7 @@
         left: 69%; */
         position: relative;
         /* top: 30px; */
-        left: 45%;
+        left: 33%;
         border: 2px solid black;
         background-color: white;
         height: 290px;
@@ -376,8 +382,20 @@
 
     #usmap {
         top: 15%;
-        left: 20%;
+        left: 25%;
         position: absolute;
+    }
+
+    .title2 {
+        padding: 10px 20px;
+        margin: 0 4px;
+        border: none;
+        border-radius: 4px;
+        font-family: serif;
+        position: absolute;
+        top: 6px;
+        left: 40%;
+        font-size: 30px;
     }
 
     .title3 {
@@ -387,8 +405,8 @@
         border-radius: 4px;
         font-family: serif;
         position: absolute;
-        top: 615px;
-        left: 35%;
+        top: 20px;
+        left: 5%;
         font-size: 30px;
     }
 
@@ -398,17 +416,61 @@
         border-radius: 4px;
         font-family: serif;
         position: relative;
-        top: 615px;
-        left: 35%;
+        top: 100px;
+        left: -30%;
         font-size: 15px;
         border: 2px solid black;
         background-color: white;
-        width: 10%;
-        height: 290px;
+        width: 200px;
+        height: 200px;
 
     }
 
+    #textbox2 {
+        padding: 10px 20px;
+        margin: 0 4px;
+        border-radius: 4px;
+        font-family: serif;
+        position: relative;
+        top: 55px;
+        left: -262px;
+        font-size: 15px;
+        border: 2px solid black;
+        background-color: white;
+        width: 280px;
+        height: 145px;
 
+    }
+
+    .xLabel {
+        padding: 10px 20px;
+        margin: 0 4px;
+        border-radius: 4px;
+        font-family: serif;
+        position: absolute;
+        top: 315px;
+        left: 15px;
+        font-size: 15px;
+        border: 2px solid black;
+        background-color: rgb(204, 214, 240);
+        width: 200px;
+        height: 45px;
+    }
+
+    .yLabel {
+        padding: 10px 20px;
+        margin: 0 4px;
+        border-radius: 4px;
+        font-family: serif;
+        position: absolute;
+        top: 585px;
+        left: 15px;
+        font-size: 15px;
+        border: 2px solid black;
+        background-color: rgb(204, 214, 240);
+        width: 200px;
+        height: 45px;
+    }
 
 
     /* Adjust the bottom-left container to be tall enough */
@@ -439,7 +501,11 @@
         <div class="bottom-container">
             <div class="bottom-left">
                 <div id="button-bar-state"></div>
+                <div class="title2"> Comparison Across Counties</div>
                 <svg id="statemap" height="450" width="500"></svg>
+                <div id="textbox2">This graph compares health spending, COVID-19 cases, and COVID-19 deaths across all
+                    50 states. Click the buttons to set which variable is on which axis and hover over each data point
+                    to see which state is being represented. </div>
                 <svg class="countyColorLegend" id="countyColorLegend" height="100" width="400"></svg>
             </div>
             <div class="bottom-right">
@@ -447,6 +513,8 @@
                 <div id="line-button2"></div>
                 <!-- <div id="line-button"></div> -->
                 <div class="title3">Comparison Across States</div>
+                <div class="xLabel"> Choose your x-axis</div>
+                <div class="yLabel"> Choose your y-axis</div>
                 <div id="textbox3">This graph compares health spending, COVID-19 cases, and COVID-19 deaths across all
                     50 states. Click the buttons to set which variable is on which axis and hover over each data point
                     to see which state is being represented. </div>
