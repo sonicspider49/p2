@@ -33,7 +33,6 @@
         justify-content: center;
         align-items: center;
         position: relative;
-        /* width: 100%; */
     }
 
     .bottom-container {
@@ -54,34 +53,23 @@
         background-color: #E6ECF5;
         display: flex;
         justify-content: flex-start;
-        /* align-items: center; */
-        /* height: 100%; */
         border-right: 2px solid black;
-
         height: 900px;
         position: relative;
-
     }
 
     #countyColorLegend {
         position: absolute;
         top: 73%;
         left: 48%;
-        /* top: 100px; */
-        /* transform: translate(250px, 980px); */
     }
 
     .bottom-right {
         flex: 60;
         background-color: #E6ECF5;
-
-        /* position: relative; */
-        /* display: flex; */
         justify-content: flex-start;
-        /* align-items: center; */
         height: 100%;
         position: relative;
-
     }
 
     .main-title {
@@ -115,13 +103,6 @@
     }
 
     #statemap {
-        /* fill: white;
-        position: absolute;
-        gap: 8px;
-        padding: 10px;
-        border: none;
-        border-radius: 4px;
-        top: 90%; */
         top: 23%;
         left: 20%;
         position: relative;
@@ -156,8 +137,6 @@
         top: 42%;
         left: 114px;
         transform: translateX(-50%);
-        /* margin-top: 80%; */
-        /* position: relative; */
     }
 
     #line-button2 {
@@ -165,9 +144,6 @@
         top: 72%;
         left: -6%;
         transform: translateX(-50%);
-        /* margin-top: 80%; */
-        /* position: relative; */
-
     }
 
     #button-bar button.health-spending,
@@ -183,10 +159,6 @@
         font-family: serif;
         margin-bottom: 7%;
         transition: 0.5s;
-        /* transition-duration: 0.4s; */
-        /* position: absolute; */
-        /* top: 99%; */
-        /* left: 99%; */
         display: block
     }
 
@@ -214,10 +186,6 @@
 
         font-family: serif;
         transition: 0.5s;
-        /* transition-duration: 0.4s; */
-        /* position: absolute; */
-        /* top: 99%; */
-        /* left: 99%; */
         display: block
     }
 
@@ -243,10 +211,6 @@
         cursor: pointer;
         font-family: serif;
         transition: 0.5s;
-        /* transition-duration: 0.4s; */
-        /* position: absolute; */
-        /* top: 99%; */
-        /* left: 99%; */
         display: block
     }
 
@@ -298,7 +262,6 @@
         color: white;
     }
 
-
     #button-bar button:hover {
         opacity: 0.9;
         color: rgb(162, 234, 236)
@@ -340,7 +303,6 @@
         stroke: none;
     }
 
-
     .background {
         z-index: 1;
         position: absolute;
@@ -365,11 +327,7 @@
     }
 
     #textbox {
-        /* 
-        position: absolute;
-        left: 69%; */
         position: relative;
-        /* top: 30px; */
         left: 33%;
         border: 2px solid black;
         background-color: white;
@@ -377,7 +335,6 @@
         font-size: 19px;
         width: 19%;
         padding: 10px;
-
     }
 
     #usmap {
@@ -423,7 +380,6 @@
         background-color: white;
         width: 200px;
         height: 200px;
-
     }
 
     #textbox2 {
@@ -439,7 +395,6 @@
         background-color: white;
         width: 280px;
         height: 100px;
-
     }
 
     .xLabel {
@@ -458,7 +413,6 @@
         display: flex;
         justify-content: center;
         align-items: center;
-
     }
 
     .yLabel {
@@ -478,12 +432,6 @@
         justify-content: center;
         align-items: center;
     }
-
-
-    /* Adjust the bottom-left container to be tall enough */
-
-
-    /* Adjust the button to fit within the container */
 </style>
 
 <body>
@@ -497,10 +445,8 @@
                 percentage of that state's population. Clicking on a state will reveal more insights, displaying
                 county level deaths and cases in the state map below.
             </div>
-            <!-- <div id="button-bar-state" style="display: none;"></div> -->
             <svg id="usmap" height="500" width="900" style="margin: auto 5px;
            float: left; "></svg>
-            <!-- <div class="usmap-description">Box holder</div> -->
             <svg class="colorLegend" id="colorLegend" height="100" width="440"
                 style="margin-top: 30%; margin-left: 1%;"></svg>
         </div>
@@ -517,7 +463,6 @@
             <div class="bottom-right">
                 <div id="line-button"></div>
                 <div id="line-button2"></div>
-                <!-- <div id="line-button"></div> -->
                 <div class="title3">Comparison Across States</div>
                 <div class="xLabel"> Choose your x-axis</div>
                 <div class="yLabel"> Choose your y-axis</div>
@@ -525,12 +470,9 @@
                     50 states. Click the buttons to set which variable is on which axis and hover over each data point
                     to see which state is being represented. </div>
                 <svg class="lineChart" id="chart" height="520" width="600"></svg>
-                <!-- <svg id="statemap" height="500" width="500" style="margin:20px"></svg> -->
-                <!-- <svg id="colorLegend" height="80" width="600" style="background: #fff; margin-top:30px"></svg> -->
             </div>
         </div>
     </div>
-
 
     <script>
         const buttonLabels = {
@@ -614,7 +556,6 @@
         const requestData = async function () {
             // import topoJSON for US map
             const us = await d3.json("us-counties.json");
-            console.log(us);
 
             // VISUALIZATION 1
             // draw US map
@@ -662,7 +603,7 @@
 
             // extract cumulative data from last day of 2020
             const latestCovidData = covidData.filter(d => {
-                return d.date.toString().includes("Dec") && d.date.toString().includes("30") && d.date.toString().includes("2020"); //fix this later to include DEC 31 if possible ~Abdul
+                return d.date.toString().includes("Dec") && d.date.toString().includes("30") && d.date.toString().includes("2020");
             });
 
             // covid deaths data dictionary, by county
@@ -1000,8 +941,6 @@
                     .attr("x", 0)
                     .attr("y", 22);
 
-                console.log(fipsCasesDict);
-
                 // mouseoverCounty function to show name of county and data value
                 function mouseoverCounty(event, d) {
                     statetooltip.style("visibility", "visible")
@@ -1171,8 +1110,6 @@
 
                             let textx = xScale(x) + margins3.left + 5;
                             let texty = yScale(y) + margins3.top + -10;
-                            console.log(textx, texty);
-                            console.log(stateName);
                             label.attr("x", textx - 10).attr("y", texty).text(stateName);
                         })
                         // get rid of changes made on mouseover
