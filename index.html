@@ -575,7 +575,6 @@
                 .on('mouseover', mouseoverState)
                 .on('mouseout', mouseoutState)
                 .on('click', (event, d) => {
-                    console.log(d);
                     updateStateMap(d);
                 });
 
@@ -679,13 +678,6 @@
                 const fips = d.fips.toString().padStart(5, '0');
                 fipsToStateDict[fips] = d.state;
             });
-
-            console.log(percentDeathsDict);
-            console.log(percentCasesDict);
-
-            console.log(healthSpendingDict);
-            console.log(covidDeathsDict);
-            console.log(covidCasesDict);
 
             // array of possible data sets for the US (normalized state-level data)
             var usData = [healthSpendingDict, percentDeathsDict, percentCasesDict];
