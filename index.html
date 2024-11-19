@@ -524,8 +524,6 @@
                 <div id="textbox3">This graph compares health spending, COVID-19 cases, and COVID-19 deaths across all
                     50 states. Click the buttons to set which variable is on which axis and hover over each data point
                     to see which state is being represented. </div>
-
-
                 <svg class="lineChart" id="chart" height="520" width="600"></svg>
                 <!-- <svg id="statemap" height="500" width="500" style="margin:20px"></svg> -->
                 <!-- <svg id="colorLegend" height="80" width="600" style="background: #fff; margin-top:30px"></svg> -->
@@ -598,6 +596,7 @@
         const margins3 = { top: 35, right: 90, bottom: 50, left: 80 };
         const chartWidth = width3 - margins3.left - margins3.right;
         const chartHeight = height3 - margins3.top - margins3.bottom;
+
         // chart background color
         svg3.append('rect')
             .attr("x", margins3.left - 10)
@@ -611,7 +610,6 @@
         let annotations = svg3.append("g").attr("id", "annotations");
         let chartArea = svg3.append('g')
             .attr('transform', `translate(${margins3.left},${margins3.top})`);
-
 
         const requestData = async function () {
             // import topoJSON for US map
@@ -745,28 +743,24 @@
             console.log(covidDeathsDict);
             console.log(covidCasesDict);
 
-            // array of possible data sets for the US (state-level data)
-            //var usData = [healthSpendingDict, covidDeathsDict, covidCasesDict];
+            // array of possible data sets for the US (normalized state-level data)
             var usData = [healthSpendingDict, percentDeathsDict, percentCasesDict];
 
-            // Currency format for health spending, decimals for deaths & cases (plus converts to %)
+            // Currency format for health spending, decimals for deaths & cases
+            // (data already converted to a percentage, formatting just adds the % symbol)
             const formatValue = [d3.format("$,.0f"),
-            (d => d3.format(".2f")(d) + "%"),
-            (d => d3.format(".1f")(d) + "%")]
+                                (d => d3.format(".2f")(d) + "%"),
+                                (d => d3.format(".1f")(d) + "%")]
 
             function updateUsScale(usToggle) {
                 let stateDict = usData[usToggle];
-                console.log(stateDict);
 
-                //const colorScale = d3.scaleQuantile().domain(Object.values(stateDict).map(d => d.total))
-                //                                    .range(d3.schemeRdPu[4]);
-
+                // create quantized color scale
                 const minMax = d3.extent(Object.values(stateDict).map(d => d.total), d => d);
-
-
                 const colorScale = d3.scaleQuantize().domain(minMax)
                     .range(d3.schemeRdPu[5]);
 
+                // use data to color states
                 usmap.selectAll(".state")
                     .style("fill", d => {
                         const stateName = d.properties.name;
@@ -776,6 +770,7 @@
                             return "#ccc";
                         }
                     });
+
                 drawLegend("#colorLegend", colorScale, formatValue[usToggle])
             }
 
@@ -894,21 +889,9 @@
 
                 const minMax = d3.extent(stateCountyValues, d => d);
 
-                // choose color scale:
-
-                // ["#fff5f0", "#fcbba1", "#fc9272", "#fb6a4a", "#cb181d"]
-
-                // Do we want 3 or 4 buckets?
-                // const colorScale = d3.scaleQuantize().domain(minMax)
-                //     .range(["#fff5f0", "#fcbba1", "#fc9272", "#cb181d"]);
+                // color scale
                 const colorScale = d3.scaleQuantize().domain(minMax)
                     .range(["#fff5f0", "#fcbba1", "#fc9272", "#fb6a4a", "#cb181d"]);
-
-
-                //const colorScale = d3.scaleQuantile().domain(stateCountyValues)
-                //                                     .range(["#fff5f0", "#fcbba1", "#fb6a4a", "#cb181d"]);
-
-                // const colorScale = d3.scaleLog().domain(minMax).interpolate(d => d3.interpolate("#fff5f0", "#cb181d"))
 
                 // color counties based on data
                 statemap.selectAll(".county")
@@ -920,7 +903,6 @@
                     });
 
                 // formatting to reduce crowded numbers
-                // let formatValue = d3.format("~s");
                 let formatValue = d3.format(".3~s");
 
                 drawLegend("#countyColorLegend", colorScale, formatValue);
@@ -1212,7 +1194,6 @@
             // x-axis toggle
             const lineKeys = Object.keys(usData);
             Object.keys(lineButtonLabels).forEach(d => {
-                // lineKeys.forEach(d => {
                 d3.select("div#line-button")
                     .append("button")
                     .attr("class", lineButtonClasses[d])
@@ -1247,18 +1228,12 @@
             d3.select("#line-button2 button").classed("active", true);
         }
         requestData();
-
-
     </script>
-
-
     <script>
         // Flexible legend-drawing function - Jeff Rzeszotarski, 2022
         //   Released under MIT Free license
         function drawLegend(legendSelector, legendColorScale, formatValue) {
             d3.select(legendSelector).selectAll("*").remove(); //need this to prevent overlap
-
-            // This code should adapt to a variety of different kinds of color scales
 
             // Shrink legend bar by 5 px inwards from sides of SVG
             const offsets = {
